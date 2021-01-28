@@ -30,6 +30,17 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        // Added temporarily to easily move to note Activity in debug
+        // TODO: remove button and navigation when proper application layout is set up
+        FloatingActionButton note_fab = findViewById(R.id.noteButton);
+        note_fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, NoteView.class);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
