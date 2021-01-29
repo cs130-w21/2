@@ -2,7 +2,6 @@ package com.example.pathways;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.TextView;
 
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -16,6 +15,7 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
+
 
 import androidx.fragment.app.FragmentActivity;
 
@@ -51,7 +51,6 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
-                // The marker will get created in setStops() which is called in readTripFromFirebase
                 _map.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 4f));
                 _map.addMarker(new MarkerOptions().position(place.getLatLng()).title(place.getName())
                         .icon(BitmapDescriptorFactory
@@ -65,6 +64,7 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
                 Log.i("TAG", "An error occurred: " + status);
             }
         });
+
     }
 
     @Override
