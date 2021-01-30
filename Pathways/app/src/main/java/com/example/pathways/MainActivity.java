@@ -20,7 +20,7 @@ import android.app.Activity;
 public class MainActivity extends AppCompatActivity {
 
     private boolean isFABOpen = false;
-    FloatingActionButton fab, fab2, fab3;
+    FloatingActionButton fab, fab2, fab3, note_fab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Added temporarily to easily move to note Activity in debug
         // TODO: remove button and navigation when proper application layout is set up
-        FloatingActionButton note_fab = findViewById(R.id.noteButton);
+        note_fab = findViewById(R.id.noteButton);
         note_fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -76,12 +76,15 @@ public class MainActivity extends AppCompatActivity {
         isFABOpen=true;
         fab.animate().translationY(-getResources().getDimension(R.dimen.standard_60));
         fab2.animate().translationY(-getResources().getDimension(R.dimen.standard_120));
+        note_fab.animate().translationY(-getResources().getDimension(R.dimen.standard_180));
     }
 
     private void closeFABMenu(){
         isFABOpen=false;
         fab.animate().translationY(0);
         fab2.animate().translationY(0);
+        note_fab.animate().translationY(0);
+
     }
 
 
