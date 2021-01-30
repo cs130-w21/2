@@ -13,7 +13,14 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.io.FileNotFoundException;
+import android.app.Activity;
+
+
 public class MainActivity extends AppCompatActivity {
+
+    private boolean isFABOpen = false;
+    FloatingActionButton fab, fab2, fab3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,12 +29,33 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
+        fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, TripView.class);
+                Intent intent = new Intent(MainActivity.this, TripViewActivity.class);
                 startActivity(intent);
+            }
+        });
+        fab2 = findViewById(R.id.fab2);
+        fab2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, ImageViewActivity.class);
+                startActivity(intent);
+
+            }
+        });
+
+        fab3 = findViewById(R.id.fab3);
+        fab3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(!isFABOpen){
+                    showFABMenu();
+                }else{
+                    closeFABMenu();
+                }
             }
         });
 
@@ -41,7 +69,21 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
     }
+
+    private void showFABMenu(){
+        isFABOpen=true;
+        fab.animate().translationY(-getResources().getDimension(R.dimen.standard_60));
+        fab2.animate().translationY(-getResources().getDimension(R.dimen.standard_120));
+    }
+
+    private void closeFABMenu(){
+        isFABOpen=false;
+        fab.animate().translationY(0);
+        fab2.animate().translationY(0);
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
