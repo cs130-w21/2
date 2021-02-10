@@ -15,6 +15,7 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 
 import androidx.fragment.app.FragmentActivity;
@@ -24,6 +25,7 @@ import java.util.Arrays;
 public class TripViewActivity extends FragmentActivity implements OnMapReadyCallback {
     private GoogleMap _map;
     private PlacesClient _placesClient;
+    private BottomSheetBehavior _bottomSheetBehavior;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +34,9 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        _bottomSheetBehavior = BottomSheetBehavior.from(findViewById(R.id.locations_list));
+
 
         if (!Places.isInitialized()) {
             Places.initialize(getApplicationContext(), "AIzaSyDXx6nHhNO_jNJiFm0ZMp7KPOSK6USBBEg");
@@ -55,7 +60,6 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
                 _map.addMarker(new MarkerOptions().position(place.getLatLng()).title(place.getName())
                         .icon(BitmapDescriptorFactory
                                 .defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
-
             }
 
             @Override
