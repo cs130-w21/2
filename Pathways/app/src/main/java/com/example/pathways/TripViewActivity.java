@@ -19,13 +19,21 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 
 import androidx.fragment.app.FragmentActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class TripViewActivity extends FragmentActivity implements OnMapReadyCallback {
     private GoogleMap _map;
     private PlacesClient _placesClient;
     private BottomSheetBehavior _bottomSheetBehavior;
+    private LocationsListAdapter _locationsListAdapter;
+
+    // We will pass this trip in from the home page.
+    private Trip _trip = new Trip();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +45,16 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
 
         _bottomSheetBehavior = BottomSheetBehavior.from(findViewById(R.id.locations_list));
 
+        RecyclerView locationsList = findViewById(R.id.locations_list_recycler_view);
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        locationsList.setLayoutManager(layoutManager);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(locationsList.getContext(),
+                layoutManager.getOrientation());
+        locationsList.addItemDecoration(dividerItemDecoration);
+
+        _locationsListAdapter = new LocationsListAdapter(this, _trip.getLocations());
+        locationsList.setAdapter(_locationsListAdapter);
 
         if (!Places.isInitialized()) {
             Places.initialize(getApplicationContext(), "AIzaSyDXx6nHhNO_jNJiFm0ZMp7KPOSK6USBBEg");
@@ -56,10 +74,26 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
+                float markerHue = 0f;
+
+                Location location = LocationConverter.PlaceToLocation(place);
+                if (_trip.getLocations().size() == 0) {
+                    _trip.setStartLocation(LocationConverter.PlaceToLocation(place));
+                    markerHue = BitmapDescriptorFactory.HUE_GREEN;
+                } else if (_trip.getLocations().size() == 1) {
+                    _trip.setEndLocation(LocationConverter.PlaceToLocation(place));
+                    markerHue = BitmapDescriptorFactory.HUE_RED;
+                } else {
+                    _trip.addLocation(location);
+                    markerHue = BitmapDescriptorFactory.HUE_YELLOW;
+                }
+
+                _locationsListAdapter.notifyDataSetChanged();
+
                 _map.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 4f));
                 _map.addMarker(new MarkerOptions().position(place.getLatLng()).title(place.getName())
                         .icon(BitmapDescriptorFactory
-                                .defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
+                                .defaultMarker(markerHue)));
             }
 
             @Override
