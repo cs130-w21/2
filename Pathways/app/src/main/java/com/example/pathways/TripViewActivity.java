@@ -31,6 +31,7 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
     private PlacesClient _placesClient;
     private BottomSheetBehavior _bottomSheetBehavior;
     private LocationsListAdapter _locationsListAdapter;
+    private AutocompleteSupportFragment _autocompleteFragment;
 
     // We will pass this trip in from the home page.
     private Trip _trip = new Trip();
@@ -63,37 +64,57 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         _placesClient = Places.createClient(this);
 
         // Initialize the AutocompleteSupportFragment.
-        AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
+        _autocompleteFragment = (AutocompleteSupportFragment)
                 getSupportFragmentManager().findFragmentById(R.id.autocomplete_frag);
-        autocompleteFragment.setHint("Add stop");
+
+        String autoCompleteHint = "Add stop";
+        if (_trip.hasNoLocations()){
+            autoCompleteHint = "Add start location";
+        } else if(_trip.getNumLocations() == 1) {
+            autoCompleteHint = "Add end location";
+        }
+
+        _autocompleteFragment.setHint(autoCompleteHint);
 
         // Specify the types of place data to return.
-        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME,
+        _autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME,
                 Place.Field.LAT_LNG, Place.Field.ADDRESS, Place.Field.RATING));
 
-        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+        _autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
-                float markerHue = 0f;
+                MarkerOptions markerOptions =
+                        new MarkerOptions().position(place.getLatLng()).title(place.getName());
 
                 Location location = LocationConverter.PlaceToLocation(place);
-                if (_trip.getLocations().size() == 0) {
+                String snippet = "";
+                if (place.getRating() != null){
+                    snippet = String.format("Rating: %s/5, ", place.getRating());
+                }
+                if (_trip.getNumLocations() == 0) {
                     _trip.setStartLocation(LocationConverter.PlaceToLocation(place));
-                    markerHue = BitmapDescriptorFactory.HUE_GREEN;
-                } else if (_trip.getLocations().size() == 1) {
+                    markerOptions.icon(BitmapDescriptorFactory
+                            .defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                    markerOptions.snippet(snippet + "Start");
+                    _autocompleteFragment.setHint("Add end location");
+                } else if (_trip.getNumLocations() == 1) {
                     _trip.setEndLocation(LocationConverter.PlaceToLocation(place));
-                    markerHue = BitmapDescriptorFactory.HUE_RED;
+                    markerOptions.icon(BitmapDescriptorFactory
+                            .defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                    markerOptions.snippet("Destination");
+                    markerOptions.snippet(snippet + "Destination");
+                    _autocompleteFragment.setHint("Add stop");
                 } else {
                     _trip.addLocation(location);
-                    markerHue = BitmapDescriptorFactory.HUE_YELLOW;
+                    markerOptions.icon(BitmapDescriptorFactory
+                            .defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
+                    markerOptions.snippet(snippet.substring(0, snippet.length() - 2));
                 }
 
                 _locationsListAdapter.notifyDataSetChanged();
 
                 _map.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 4f));
-                _map.addMarker(new MarkerOptions().position(place.getLatLng()).title(place.getName())
-                        .icon(BitmapDescriptorFactory
-                                .defaultMarker(markerHue)));
+                _map.addMarker(markerOptions);
             }
 
             @Override

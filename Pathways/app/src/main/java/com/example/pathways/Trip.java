@@ -46,4 +46,11 @@ public class Trip {
         this._locations.add(_locations.size() - 1, location);
     }
 
+    public int getNumLocations() {
+        return _locations.size();
+    }
+
+    public boolean hasNoLocations() {
+        return _locations.isEmpty();
+    }
 }

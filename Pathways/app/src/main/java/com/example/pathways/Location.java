@@ -1,68 +1,68 @@
 package com.example.pathways;
 
 public class Location {
-    private String name;
-    private String address;
-    private double latitude;
-    private double longitude;
-    private double duration;
-    private String rating;
+    private String _name;
+    private String _address;
+    private double _latitude;
+    private double _longitude;
+    private double _duration;
+    private String _rating;
 
     private Location(Builder builder) {
-        this.name = builder.name;
-        this.address = builder.address;
-        this.latitude = builder.latitude;
-        this.longitude = builder.longitude;
-        this.duration = builder.duration;
-        this.rating = builder.rating;
+        this._name = builder.name;
+        this._address = builder.address;
+        this._latitude = builder.latitude;
+        this._longitude = builder.longitude;
+        this._duration = builder.duration;
+        this._rating = builder.rating;
     }
 
     public String getName() {
-        return name;
+        return _name;
     }
 
     public void setName(String name) {
-        this.name = name;
+        this._name = name;
     }
 
     public String getAddress() {
-        return address;
+        return _address;
     }
 
     public void setAddress(String address) {
-        this.address = address;
+        this._address = address;
     }
 
-    public double getLatitude() {
-        return latitude;
+    public double get_latitude() {
+        return _latitude;
     }
 
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
+    public void set_latitude(double _latitude) {
+        this._latitude = _latitude;
     }
 
     public double getLongitude() {
-        return longitude;
+        return _longitude;
     }
 
     public void setLongitude(double longitude) {
-        this.longitude = longitude;
+        this._longitude = longitude;
     }
 
     public double getDuration() {
-        return duration;
+        return _duration;
     }
 
     public void setDuration(double duration) {
-        this.duration = duration;
+        this._duration = duration;
     }
 
     public String getRating() {
-        return rating;
+        return _rating;
     }
 
     public void setRating(String rating) {
-        this.rating = rating;
+        this._rating = rating;
     }
 
     public static class Builder {
