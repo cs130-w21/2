@@ -1,6 +1,7 @@
 package com.example.pathways;
 
 public class Location {
+    private String locationId;
     private String name;
     private String address;
     private double latitude;

@@ -19,6 +19,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 
 import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -31,19 +32,26 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
     private PlacesClient _placesClient;
     private BottomSheetBehavior _bottomSheetBehavior;
     private LocationsListAdapter _locationsListAdapter;
+    private AppDatabase _db;
+    private TripDao _tripDao;
 
     // We will pass this trip in from the home page.
-    private Trip _trip = new Trip();
+    private Trip _trip;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_trip_view);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        _bottomSheetBehavior = BottomSheetBehavior.from(findViewById(R.id.locations_list));
+        _db = DatabaseSingleton.getInstance(this);
+        _tripDao = _db.tripDao();
+        TripEntity tripEntity = (TripEntity) getIntent().getSerializableExtra("TRIP");
+        _trip = new Trip(tripEntity.tripName);
+        Log.v("Trip Name", _trip.getName());
 
         RecyclerView locationsList = findViewById(R.id.locations_list_recycler_view);
 
@@ -55,6 +63,19 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
 
         _locationsListAdapter = new LocationsListAdapter(this, _trip.getLocations());
         locationsList.setAdapter(_locationsListAdapter);
+
+        //read database like this
+//        _tripDao.findByID(getIntent().getLongExtra("TRIP_ID", 0)).observe(this, new Observer<TripEntity>() {
+//            @Override
+//            public void onChanged(TripEntity tripEntity) {
+//                _trip = new Trip(tripEntity.tripName);
+//                Log.v("Trip Name", _trip.getName());
+//            }
+//        });
+
+        _bottomSheetBehavior = BottomSheetBehavior.from(findViewById(R.id.locations_list));
+
+
 
         if (!Places.isInitialized()) {
             Places.initialize(getApplicationContext(), "AIzaSyDXx6nHhNO_jNJiFm0ZMp7KPOSK6USBBEg");

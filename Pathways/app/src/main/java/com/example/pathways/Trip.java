@@ -46,4 +46,8 @@ public class Trip {
         this._locations.add(_locations.size() - 1, location);
     }
 
+    public String getName(){
+        return _name;
+    }
+
 }

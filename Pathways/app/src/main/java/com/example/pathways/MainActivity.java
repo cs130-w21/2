@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,11 +15,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Menu;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
-import android.app.Activity;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -29,26 +28,35 @@ import android.widget.SearchView;
 
 public class MainActivity extends AppCompatActivity {
 
-    private boolean isFABOpen = false;
-    FloatingActionButton trip_fab, fab2, fab3, note_fab;
-    ArrayAdapter<String> arrayAdapter;
+    private boolean _isFabOpen = false;
+    FloatingActionButton _tripFab, _fab2, _fab3, _noteFab;
+    ArrayAdapter<String> _arrayAdapter;
+    private AppDatabase _db;
+    private TripDao _tripDao;
+    private UserDao _userDao;
+    private Executor _executor = Executors.newSingleThreadExecutor();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        _db = DatabaseSingleton.getInstance(this);
+        _tripDao = _db.tripDao();
+        _userDao = _db.userDao();
+
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        trip_fab = findViewById(R.id.trip_fab);
-        trip_fab.setOnClickListener(new View.OnClickListener() {
+        _tripFab = findViewById(R.id.trip_fab);
+        _tripFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 createTripDialog(MainActivity.this);
             }
         });
-        fab2 = findViewById(R.id.fab2);
-        fab2.setOnClickListener(new View.OnClickListener() {
+        _fab2 = findViewById(R.id.fab2);
+        _fab2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, ImageViewActivity.class);
@@ -57,11 +65,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        fab3 = findViewById(R.id.fab3);
-        fab3.setOnClickListener(new View.OnClickListener() {
+        _fab3 = findViewById(R.id.fab3);
+        _fab3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!isFABOpen){
+                if(!_isFabOpen){
                     showFABMenu();
                 }else{
                     closeFABMenu();
@@ -71,8 +79,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Added temporarily to easily move to note Activity in debug
         // TODO: remove button and navigation when proper application layout is set up
-        note_fab = findViewById(R.id.noteButton);
-        note_fab.setOnClickListener(new View.OnClickListener() {
+        _noteFab = findViewById(R.id.noteButton);
+        _noteFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, NoteView.class);
@@ -86,8 +94,8 @@ public class MainActivity extends AppCompatActivity {
         trip_list.add("Australia"); trip_list.add("Austria");
         trip_list.add("Afghanistan"); trip_list.add("Europe");
 
-        arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, trip_list);
-        listView.setAdapter(arrayAdapter);
+        _arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, trip_list);
+        listView.setAdapter(_arrayAdapter);
     }
 
     private void createTripDialog(Context c) {
@@ -101,9 +109,18 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String trip_name = String.valueOf(taskEditText.getText());
-                        Intent intent = new Intent(MainActivity.this, TripViewActivity.class);
-                        intent.putExtra("TRIP_NAME", trip_name);
-                        startActivity(intent);
+                        final TripEntity trip = new TripEntity();
+                        trip.tripName = trip_name;
+                        _executor.execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                Long tripId = _tripDao.insert(trip);
+                                Intent intent = new Intent(MainActivity.this, TripViewActivity.class);
+                                intent.putExtra("TRIP", trip);
+                                startActivity(intent);
+                            }
+                        });
+
                     }
                 })
                 .setNegativeButton("Cancel", null)
@@ -112,17 +129,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showFABMenu(){
-        isFABOpen=true;
-        trip_fab.animate().translationY(-getResources().getDimension(R.dimen.standard_60));
-        fab2.animate().translationY(-getResources().getDimension(R.dimen.standard_120));
-        note_fab.animate().translationY(-getResources().getDimension(R.dimen.standard_180));
+        _isFabOpen =true;
+        _tripFab.animate().translationY(-getResources().getDimension(R.dimen.standard_60));
+        _fab2.animate().translationY(-getResources().getDimension(R.dimen.standard_120));
+        _noteFab.animate().translationY(-getResources().getDimension(R.dimen.standard_180));
     }
 
     private void closeFABMenu(){
-        isFABOpen=false;
-        trip_fab.animate().translationY(0);
-        fab2.animate().translationY(0);
-        note_fab.animate().translationY(0);
+        _isFabOpen =false;
+        _tripFab.animate().translationY(0);
+        _fab2.animate().translationY(0);
+        _noteFab.animate().translationY(0);
 
     }
 
@@ -142,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                arrayAdapter.getFilter().filter(newText);
+                _arrayAdapter.getFilter().filter(newText);
                 return true;
             }
         });
