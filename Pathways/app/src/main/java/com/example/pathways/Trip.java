@@ -3,42 +3,47 @@ package com.example.pathways;
 import java.util.ArrayList;
 
 public class Trip {
-    private Location startLocation;
-    private Location endLocation;
-    private ArrayList<Location> locations = new ArrayList<>();
+    private Location _startLocation;
+    private Location _endLocation;
+    private ArrayList<Location> _locations = new ArrayList<>();
+    private String _name;
 
-    public Trip(){}
+    public Trip() {}
+
+    public Trip(String trip_name){
+        _name = trip_name;
+    }
 
     public Trip(Location start, Location end){}
 
     public Location getStartLocation() {
-        return startLocation;
+        return _startLocation;
     }
 
     public void setStartLocation(Location startLocation) {
-        this.startLocation = startLocation;
-        locations.add(startLocation);
+        this._startLocation = startLocation;
+        _locations.add(startLocation);
     }
 
     public Location getEndLocation() {
-        return endLocation;
+        return _endLocation;
     }
 
     public void setEndLocation(Location endLocation) {
-        this.endLocation = endLocation;
-        locations.add(endLocation);
+        this._endLocation = endLocation;
+        _locations.add(endLocation);
     }
 
     public ArrayList<Location> getLocations() {
-        return locations;
+        return _locations;
     }
 
     public void setLocations(ArrayList<Location> locations) {
-        this.locations = locations;
+        this._locations = locations;
     }
 
     public void addLocation(Location location) {
-        this.locations.add(locations.size() - 1, location);
+        this._locations.add(_locations.size() - 1, location);
     }
 
 }

@@ -1,26 +1,37 @@
 package com.example.pathways;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Menu;
-import android.view.MenuItem;
 
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
+
 import android.app.Activity;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.SearchView;
 
 
 public class MainActivity extends AppCompatActivity {
 
     private boolean isFABOpen = false;
-    FloatingActionButton fab, fab2, fab3, note_fab;
+    FloatingActionButton trip_fab, fab2, fab3, note_fab;
+    ArrayAdapter<String> arrayAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,12 +40,11 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        trip_fab = findViewById(R.id.trip_fab);
+        trip_fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, TripViewActivity.class);
-                startActivity(intent);
+                createTripDialog(MainActivity.this);
             }
         });
         fab2 = findViewById(R.id.fab2);
@@ -70,18 +80,47 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        ListView listView = findViewById(R.id.trip_list);
+        List<String> trip_list = new ArrayList<>();
+        trip_list.add("France"); trip_list.add("England");
+        trip_list.add("Australia"); trip_list.add("Austria");
+        trip_list.add("Afghanistan"); trip_list.add("Europe");
+
+        arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, trip_list);
+        listView.setAdapter(arrayAdapter);
+    }
+
+    private void createTripDialog(Context c) {
+        //Found online, credit to Alvin Alexander
+        final EditText taskEditText = new EditText(c);
+        AlertDialog dialog = new AlertDialog.Builder(c)
+                .setTitle("Enter Name")
+                .setMessage("Name your trip")
+                .setView(taskEditText)
+                .setPositiveButton("Add", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String trip_name = String.valueOf(taskEditText.getText());
+                        Intent intent = new Intent(MainActivity.this, TripViewActivity.class);
+                        intent.putExtra("TRIP_NAME", trip_name);
+                        startActivity(intent);
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .create();
+        dialog.show();
     }
 
     private void showFABMenu(){
         isFABOpen=true;
-        fab.animate().translationY(-getResources().getDimension(R.dimen.standard_60));
+        trip_fab.animate().translationY(-getResources().getDimension(R.dimen.standard_60));
         fab2.animate().translationY(-getResources().getDimension(R.dimen.standard_120));
         note_fab.animate().translationY(-getResources().getDimension(R.dimen.standard_180));
     }
 
     private void closeFABMenu(){
         isFABOpen=false;
-        fab.animate().translationY(0);
+        trip_fab.animate().translationY(0);
         fab2.animate().translationY(0);
         note_fab.animate().translationY(0);
 
@@ -92,6 +131,21 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        MenuItem menuItem = menu.findItem(R.id.search_icon);
+        SearchView searchView = (SearchView) menuItem.getActionView();
+        searchView.setQueryHint("Search Trips");
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                arrayAdapter.getFilter().filter(newText);
+                return true;
+            }
+        });
         return true;
     }
 
