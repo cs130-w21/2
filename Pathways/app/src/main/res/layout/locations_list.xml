@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/locations_list"
+    android:layout_width="match_parent"
+    android:layout_height="500dp"
+    android:background="@android:color/white"
+    android:orientation="vertical"
+    app:behavior_peekHeight="84dp"
+    android:elevation="16dp"
+    app:layout_behavior="@string/bottom_sheet_behavior">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="84dp"
+        android:background="@color/colorPrimaryDark"
+        android:paddingTop="5.5dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/itineraryTextViewTripName"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:text="Trip Name"
+                    android:textAlignment="textStart"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:gravity="start" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/locations_list_start"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Start Location"
+                android:textColor="@android:color/white"
+                android:textAlignment="textStart"
+                android:textSize="12sp"
+                android:gravity="start" />
+
+
+            <TextView
+                android:id="@+id/locations_list_end"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="End Location"
+                android:textColor="@android:color/white"
+                android:textAlignment="textStart"
+                android:textSize="12sp"
+                android:gravity="start" />
+
+        </LinearLayout>
+
+
+    </RelativeLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/locations_list_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+</LinearLayout>
