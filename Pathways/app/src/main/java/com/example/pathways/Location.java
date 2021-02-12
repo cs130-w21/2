@@ -9,6 +9,7 @@ public class Location {
     private String _rating;
     private String _placeId;
 
+
     private Location(Builder builder) {
         this._name = builder.name;
         this._address = builder.address;
