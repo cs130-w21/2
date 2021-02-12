@@ -1,8 +1,10 @@
 package com.example.pathways;
 
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -25,14 +27,16 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+
 public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "EmailPassword";
-    private static final int RC_SIGN_IN = 123;
+
     EditText _emailText;
     EditText _passwordText;
     Button _submitButton;
     Button _registerButton;
+
     private ProgressBar _progressBar;
     private FirebaseAuth auth;
 
@@ -54,6 +58,7 @@ public class LoginActivity extends AppCompatActivity {
         _passwordText = (EditText) findViewById(R.id.password);
         _submitButton = findViewById(R.id.submit_button);
         _registerButton = findViewById(R.id.register_button);
+
         _progressBar = new ProgressBar(this);
         auth = FirebaseAuth.getInstance();
 
@@ -74,8 +79,6 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        //AuthUI authUI = AuthUI.getInstance();
-        //authUI.useEmulator("10.0.2.2", 9099);
     }
 
     public void register(String email, String password) {
@@ -149,6 +152,3 @@ public class LoginActivity extends AppCompatActivity {
 
 }
 //https://firebase.google.com/docs/auth/android/password-auth#create_a_password-based_account resource
-
-
-
