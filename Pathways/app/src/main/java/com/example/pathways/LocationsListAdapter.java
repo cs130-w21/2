@@ -51,8 +51,14 @@ public class LocationsListAdapter extends RecyclerView.Adapter<LocationsListAdap
             holder._imageButton.setVisibility(View.VISIBLE);
         }
 
+        holder._textViewStopAddress.setVisibility(View.GONE);
+        if(location.getAddress() != null) {
+            holder._textViewStopAddress.setVisibility(View.VISIBLE);
+            holder._textViewStopAddress.setText(location.getAddress());
+        }
+
         holder._textViewStopName.setText(location.getName());
-        holder._textViewDuration.setText("Duration");
+        holder._textViewDuration.setText(location.getDuration());
 
         if (location.getRating().equals("" + -1d)) {
             holder._textViewRating.setVisibility(View.GONE);

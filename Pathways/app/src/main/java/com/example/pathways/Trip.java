@@ -20,7 +20,7 @@ public class Trip {
         return _startLocation;
     }
 
-    public void setStartLocation(Location startLocation) {
+    public void addStartLocation(Location startLocation) {
         this._startLocation = startLocation;
         _locations.add(startLocation);
     }
@@ -29,7 +29,7 @@ public class Trip {
         return _endLocation;
     }
 
-    public void setEndLocation(Location endLocation) {
+    public void addEndLocation(Location endLocation) {
         this._endLocation = endLocation;
         _locations.add(endLocation);
     }

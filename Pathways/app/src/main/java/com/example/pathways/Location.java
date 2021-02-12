@@ -5,7 +5,7 @@ public class Location {
     private String _address;
     private double _latitude;
     private double _longitude;
-    private double _duration;
+    private String _duration;
     private String _rating;
 
     private Location(Builder builder) {
@@ -33,11 +33,11 @@ public class Location {
         this._address = address;
     }
 
-    public double get_latitude() {
+    public double getLatitude() {
         return _latitude;
     }
 
-    public void set_latitude(double _latitude) {
+    public void setLatitude(double _latitude) {
         this._latitude = _latitude;
     }
 
@@ -49,11 +49,11 @@ public class Location {
         this._longitude = longitude;
     }
 
-    public double getDuration() {
+    public String getDuration() {
         return _duration;
     }
 
-    public void setDuration(double duration) {
+    public void setDuration(String duration) {
         this._duration = duration;
     }
 
@@ -70,7 +70,7 @@ public class Location {
         private String address;
         private double latitude;
         private double longitude;
-        private double duration = -1;
+        private String duration = "";
         private String rating = "";
 
         public Location build() {
@@ -97,7 +97,7 @@ public class Location {
             return this;
         }
 
-        public Builder setDuration(double duration) {
+        public Builder setDuration(String duration) {
             this.duration = duration;
             return this;
         }
