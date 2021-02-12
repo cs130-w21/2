@@ -19,23 +19,32 @@ public class LocationsListAdapter extends RecyclerView.Adapter<LocationsListAdap
     private Location _startLocation;
     private Location _endLocation;
     private LayoutInflater _layoutInlater;
+    private AdapterCallbacks _callbacks;
+
+    public interface AdapterCallbacks {
+        void onStopDeleted(String placeId);
+
+        void onItemClicked(String placeId);
+    }
 
     public LocationsListAdapter(Context context,
-                                ArrayList<Location> locations){
+                                ArrayList<Location> locations, AdapterCallbacks adapterCallbacks){
         _layoutInlater = LayoutInflater.from(context);
         _locations = locations;
+        _callbacks = adapterCallbacks;
     }
 
     @NonNull
     @Override
     public LocationsListAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = _layoutInlater.inflate(R.layout.locations_list_item, parent, false);
-        return new LocationsListAdapter.ViewHolder(view);
+        return new LocationsListAdapter.ViewHolder(view, _callbacks);
     }
 
     @Override
     public void onBindViewHolder(@NonNull LocationsListAdapter.ViewHolder holder, int position) {
         Location location = _locations.get(position);
+        holder.setPlaceId(location.getPlaceId());
 
         if (position == 0){
             holder._textViewStopType.setText("Start Location");
@@ -83,8 +92,13 @@ public class LocationsListAdapter extends RecyclerView.Adapter<LocationsListAdap
         ImageButton _imageButton;
         RelativeLayout _listItem;
         String _placeId;
+        AdapterCallbacks _adapterCallbacks;
 
-        public ViewHolder(@NonNull View itemView) {
+        public void setPlaceId(String placeId){
+            _placeId = placeId;
+        }
+
+        public ViewHolder(@NonNull View itemView, AdapterCallbacks adapterCallbacks) {
             super(itemView);
             _textViewStopName = itemView.findViewById(R.id.text_view_stop_name);
             _textViewStopAddress = itemView.findViewById(R.id.text_view_stop_address);
@@ -95,11 +109,17 @@ public class LocationsListAdapter extends RecyclerView.Adapter<LocationsListAdap
             _imageButton.setOnClickListener(this);
             _listItem = itemView.findViewById(R.id.layout_locations_list_item);
             _listItem.setOnClickListener(this);
+            _adapterCallbacks = adapterCallbacks;
         }
 
         @Override
         public void onClick(View view) {
-            // Handle deletion here.
+            if (view.getId() == R.id.delete_stop_button) {
+                _adapterCallbacks.onStopDeleted(_placeId);
+            } else {
+                _adapterCallbacks.onItemClicked(_placeId);
+            }
+
         }
     }
 }

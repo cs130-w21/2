@@ -53,4 +53,13 @@ public class Trip {
     public boolean hasNoLocations() {
         return _locations.isEmpty();
     }
+
+    public void removeLocation(String placeId) {
+        for (Location location : _locations) {
+            if (location.getPlaceId() == placeId) {
+                _locations.remove(location);
+                break;
+            }
+        }
+    }
 }

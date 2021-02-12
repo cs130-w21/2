@@ -7,6 +7,7 @@ public class Location {
     private double _longitude;
     private String _duration;
     private String _rating;
+    private String _placeId;
 
     private Location(Builder builder) {
         this._name = builder.name;
@@ -15,6 +16,7 @@ public class Location {
         this._longitude = builder.longitude;
         this._duration = builder.duration;
         this._rating = builder.rating;
+        this._placeId = builder.placeId;
     }
 
     public String getName() {
@@ -65,6 +67,14 @@ public class Location {
         this._rating = rating;
     }
 
+    public String getPlaceId() {
+        return _placeId;
+    }
+
+    public void setPlaceId(String placeId) {
+        this._placeId = placeId;
+    }
+
     public static class Builder {
         private String name;
         private String address;
@@ -72,6 +82,7 @@ public class Location {
         private double longitude;
         private String duration = "";
         private String rating = "";
+        private String placeId;
 
         public Location build() {
             return new Location(this);
@@ -104,6 +115,11 @@ public class Location {
 
         public Builder setRating(String rating) {
             this.rating = rating;
+            return this;
+        }
+
+        public Builder setPlaceId(String placeId) {
+            this.placeId = placeId;
             return this;
         }
     }

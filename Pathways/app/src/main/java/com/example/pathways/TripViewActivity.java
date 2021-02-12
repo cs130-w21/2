@@ -38,11 +38,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class TripViewActivity extends FragmentActivity implements OnMapReadyCallback {
+public class TripViewActivity extends FragmentActivity implements OnMapReadyCallback,
+        LocationsListAdapter.AdapterCallbacks {
     private GoogleMap _map;
     private PlacesClient _placesClient;
     private BottomSheetBehavior _bottomSheetBehavior;
@@ -50,6 +52,7 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
     private AutocompleteSupportFragment _autocompleteFragment;
     private GeoApiContext _geoApiContext;
     private Polyline _routePolyline;
+    private HashMap<String, Marker> _markerMap = new HashMap<>();
 
     // We will pass this trip in from the home page.
     private Trip _trip = new Trip();
@@ -72,7 +75,7 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
                 layoutManager.getOrientation());
         locationsList.addItemDecoration(dividerItemDecoration);
 
-        _locationsListAdapter = new LocationsListAdapter(this, _trip.getLocations());
+        _locationsListAdapter = new LocationsListAdapter(this, _trip.getLocations(), this);
         locationsList.setAdapter(_locationsListAdapter);
 
         if (!Places.isInitialized()) {
@@ -134,7 +137,8 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
                 _locationsListAdapter.notifyDataSetChanged();
 
                 _map.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 4f));
-                _map.addMarker(markerOptions);
+                _markerMap.put(place.getId(), _map.addMarker(markerOptions));
+
                 createRoute();
             }
 
@@ -230,5 +234,23 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
     @Override
     public void onMapReady(GoogleMap googleMap) {
         _map = googleMap;
+    }
+
+    @Override
+    public void onStopDeleted(String placeId) {
+        _trip.removeLocation(placeId);
+        _locationsListAdapter.notifyDataSetChanged();
+        _markerMap.get(placeId).remove();
+        _markerMap.remove(placeId);
+        createRoute();
+    }
+
+    @Override
+    public void onItemClicked(String placeId) {
+        Marker marker = _markerMap.get(placeId);
+        marker.showInfoWindow();
+        _bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+        _map.moveCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 5));
     }
 }

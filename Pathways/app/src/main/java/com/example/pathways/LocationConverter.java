@@ -18,7 +18,6 @@ public class LocationConverter {
 
         return builder.setName(place.getName()).setAddress(place.getAddress())
                 .setLatitude(place.getLatLng().latitude).setLongitude(place.getLatLng().longitude)
-                .setRating(rating.toString()).build();
-
+                .setRating(rating.toString()).setPlaceId(place.getId()).build();
     }
 }
