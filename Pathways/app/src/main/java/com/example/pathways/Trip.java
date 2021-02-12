@@ -20,7 +20,7 @@ public class Trip {
         return _startLocation;
     }
 
-    public void setStartLocation(Location startLocation) {
+    public void addStartLocation(Location startLocation) {
         this._startLocation = startLocation;
         _locations.add(startLocation);
     }
@@ -29,7 +29,7 @@ public class Trip {
         return _endLocation;
     }
 
-    public void setEndLocation(Location endLocation) {
+    public void addEndLocation(Location endLocation) {
         this._endLocation = endLocation;
         _locations.add(endLocation);
     }
@@ -46,8 +46,25 @@ public class Trip {
         this._locations.add(_locations.size() - 1, location);
     }
 
+
     public String getName(){
         return _name;
     }
 
+    public int getNumLocations() {
+        return _locations.size();
+    }
+
+    public boolean hasNoLocations() {
+        return _locations.isEmpty();
+    }
+
+    public void removeLocation(String placeId) {
+        for (Location location : _locations) {
+            if (location.getPlaceId() == placeId) {
+                _locations.remove(location);
+                break;
+            }
+        }
+    }
 }
