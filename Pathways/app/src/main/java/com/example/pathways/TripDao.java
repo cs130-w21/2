@@ -15,7 +15,7 @@ public interface TripDao {
     LiveData<TripEntity> findByID(Long trip_id);
 
     @Query("SELECT * FROM tripentity WHERE trip_name LIKE :trip_name")
-    TripEntity findByName(Integer trip_name);
+    LiveData<TripEntity> findByName(String trip_name);
 
     @Update
     void updateTrips(TripEntity... trips);

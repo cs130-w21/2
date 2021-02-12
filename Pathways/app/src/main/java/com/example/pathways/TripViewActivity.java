@@ -2,6 +2,7 @@ package com.example.pathways;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -75,7 +76,8 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
 
         _bottomSheetBehavior = BottomSheetBehavior.from(findViewById(R.id.locations_list));
 
-
+        TextView trip_name = findViewById(R.id.itineraryTextViewTripName);
+        trip_name.setText(_trip.getName());
 
         if (!Places.isInitialized()) {
             Places.initialize(getApplicationContext(), "AIzaSyDXx6nHhNO_jNJiFm0ZMp7KPOSK6USBBEg");
