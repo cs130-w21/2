@@ -7,6 +7,8 @@ import android.database.Cursor;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.FirebaseAuth;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -45,11 +47,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Executor _executor = Executors.newSingleThreadExecutor();
     private List<TripEntity> _tripList;
     private List<String> _tripNameList;
+    private boolean isFABOpen = false;
+    private FirebaseAuth _auth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        _auth = FirebaseAuth.getInstance();
         _db = DatabaseSingleton.getInstance(this);
         _tripDao = _db.tripDao();
         _userDao = _db.userDao();
@@ -136,8 +141,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(intent);
             }
         });
-
-
     }
 
 
@@ -270,8 +273,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if (id == R.id.action_logout) {
+            _auth.signOut();
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(intent);
         }
 
         return super.onOptionsItemSelected(item);
