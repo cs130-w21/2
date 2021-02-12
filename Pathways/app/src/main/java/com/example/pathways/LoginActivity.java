@@ -46,6 +46,7 @@ public class LoginActivity extends AppCompatActivity {
         // Check if user is signed in (non-null) and update UI accordingly.
         if (auth.getCurrentUser() != null) {
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            intent.putExtra("EMAIL", auth.getCurrentUser().getEmail());
             startActivity(intent);
         }
     }
@@ -120,6 +121,7 @@ public class LoginActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            intent.putExtra("EMAIL", email);
                             startActivity(intent);
                         } else {
                             if (task.getException() != null) {
