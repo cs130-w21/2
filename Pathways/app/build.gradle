@@ -37,9 +37,11 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
     implementation platform('com.google.firebase:firebase-bom:26.4.0')
     implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.firebaseui:firebase-ui-auth:7.1.1'
+
     implementation 'com.google.maps:google-maps-services:0.17.0'
     implementation 'org.slf4j:slf4j-simple:1.7.25'
     implementation group: 'com.github.seratch', name: 'java-time-backport', version: '1.0.0'
-    implementation 'com.firebaseui:firebase-ui-auth:7.1.1'
     implementation 'com.android.support:multidex:2.0.1'
+
 }
