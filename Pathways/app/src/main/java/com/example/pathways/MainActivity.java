@@ -102,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
         });
+
         _tripFab = findViewById(R.id.trip_fab);
         _tripFab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -160,6 +161,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 public void onChanged(TripEntity tripEntity) {
                     _tripList.add(tripEntity);
                     _tripNameList.add(tripEntity.tripName);
+                    _arrayAdapter.notifyDataSetChanged();
                 }
             });
         }
@@ -239,29 +241,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        searchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
-            @Override
-            public boolean onSuggestionSelect(int position) {
-                return false;
-            }
 
-            @Override
-            public boolean onSuggestionClick(int position) {
-                Cursor cursor = cAdapter.getCursor();
-                cursor.moveToPosition(position);
-                final String selectedTripName = cursor.getString(cursor.getColumnIndex(BaseColumns._ID));
-                _tripDao.findByName(selectedTripName).observe(new AppCompatActivity(), new Observer<TripEntity>() {
-                    @Override
-                    public void onChanged(TripEntity tripEntity) {
-
-                        Intent intent = new Intent(MainActivity.this, TripViewActivity.class);
-                        intent.putExtra("TRIP", tripEntity);
-                        startActivity(intent);
-                    }
-                });
-                return true;
-            }
-        });
         return true;
     }
 
