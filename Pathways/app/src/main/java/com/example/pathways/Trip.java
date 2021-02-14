@@ -1,12 +1,13 @@
 package com.example.pathways;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Trip {
-    private Location _startLocation;
-    private Location _endLocation;
     private ArrayList<Location> _locations = new ArrayList<>();
     private String _name;
+    private List<String> _images;
+    private List<Long> _noteIds;
 
     public Trip() {}
 
@@ -17,21 +18,11 @@ public class Trip {
     public Trip(Location start, Location end){}
 
     public Location getStartLocation() {
-        return _startLocation;
-    }
-
-    public void addStartLocation(Location startLocation) {
-        this._startLocation = startLocation;
-        _locations.add(startLocation);
+        return _locations.get(0);
     }
 
     public Location getEndLocation() {
-        return _endLocation;
-    }
-
-    public void addEndLocation(Location endLocation) {
-        this._endLocation = endLocation;
-        _locations.add(endLocation);
+        return _locations.get(_locations.size() - 1);
     }
 
     public ArrayList<Location> getLocations() {
@@ -42,8 +33,13 @@ public class Trip {
         this._locations = locations;
     }
 
+    // First 2 locations added are start and stop location.
     public void addLocation(Location location) {
-        this._locations.add(_locations.size() - 1, location);
+        if (_locations.size() < 2) {
+            this._locations.add(location);
+        } else {
+            this._locations.add(_locations.size() - 1, location);
+        }
     }
 
 
@@ -66,5 +62,21 @@ public class Trip {
                 break;
             }
         }
+    }
+
+    public List<String> getImages() {
+        return _images;
+    }
+
+    public void setImages(List<String> _images) {
+        this._images = _images;
+    }
+
+    public List<Long> getNoteIds() {
+        return _noteIds;
+    }
+
+    public void setNoteIds(List<Long> _noteIds) {
+        this._noteIds = _noteIds;
     }
 }

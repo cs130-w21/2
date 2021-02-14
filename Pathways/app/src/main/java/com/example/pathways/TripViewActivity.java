@@ -19,6 +19,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
@@ -42,8 +43,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class TripViewActivity extends FragmentActivity implements OnMapReadyCallback,
         LocationsListAdapter.AdapterCallbacks {
@@ -57,10 +58,18 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
     private GeoApiContext _geoApiContext;
     private Polyline _routePolyline;
     private HashMap<String, Marker> _markerMap = new HashMap<>();
+    private Executor _executor = Executors.newSingleThreadExecutor();
+    private HashMap<Integer, Place> _tempPlaces = new HashMap<>();
 
+    enum  LocationType {
+        START,
+        END,
+        MIDDLE,
+    }
 
-    // We will pass this trip in from the home page.
     private Trip _trip;
+    // Database entity
+    private TripEntity _tripEntity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,37 +79,6 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-        _db = DatabaseSingleton.getInstance(this);
-        _tripDao = _db.tripDao();
-        TripEntity tripEntity = (TripEntity) getIntent().getSerializableExtra("TRIP");
-        _trip = new Trip(tripEntity.tripName);
-        Log.v("Trip Name", _trip.getName());
-
-        RecyclerView locationsList = findViewById(R.id.locations_list_recycler_view);
-
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        locationsList.setLayoutManager(layoutManager);
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(locationsList.getContext(),
-                layoutManager.getOrientation());
-        locationsList.addItemDecoration(dividerItemDecoration);
-
-        _locationsListAdapter = new LocationsListAdapter(this, _trip.getLocations(), this);
-        locationsList.setAdapter(_locationsListAdapter);
-
-        //read database like this
-//        _tripDao.findByID(getIntent().getLongExtra("TRIP_ID", 0)).observe(this, new Observer<TripEntity>() {
-//            @Override
-//            public void onChanged(TripEntity tripEntity) {
-//                _trip = new Trip(tripEntity.tripName);
-//                Log.v("Trip Name", _trip.getName());
-//            }
-//        });
-
-        _bottomSheetBehavior = BottomSheetBehavior.from(findViewById(R.id.locations_list));
-
-        TextView trip_name = findViewById(R.id.itineraryTextViewTripName);
-        trip_name.setText(_trip.getName());
 
         if (!Places.isInitialized()) {
             Places.initialize(getApplicationContext(), "AIzaSyDXx6nHhNO_jNJiFm0ZMp7KPOSK6USBBEg");
@@ -112,14 +90,22 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         _autocompleteFragment = (AutocompleteSupportFragment)
                 getSupportFragmentManager().findFragmentById(R.id.autocomplete_frag);
 
-        String autoCompleteHint = "Add stop";
-        if (_trip.hasNoLocations()){
-            autoCompleteHint = "Add start location";
-        } else if(_trip.getNumLocations() == 1) {
-            autoCompleteHint = "Add end location";
-        }
+        _db = DatabaseSingleton.getInstance(this);
+        _tripDao = _db.tripDao();
 
-        _autocompleteFragment.setHint(autoCompleteHint);
+        Long tripId =  (Long) getIntent().getSerializableExtra("TRIP ID");
+
+        _tripDao.findByID(tripId).observe(this, new Observer<TripEntity>() {
+            @Override
+            public void onChanged(TripEntity tripEntity) {
+                _tripEntity = tripEntity;
+                Log.v("NAME", tripEntity.tripName);
+                generateTripFromTripEntity();
+                tripDependentInit();
+            }
+        });
+
+        _autocompleteFragment.setHint("Add stop");
 
         // Specify the types of place data to return.
         _autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME,
@@ -128,42 +114,27 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         _autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
-                MarkerOptions markerOptions =
-                        new MarkerOptions().position(place.getLatLng()).title(place.getName());
+                LocationType locationType = LocationType.MIDDLE;
+               if (_trip.getNumLocations() == 0){
+                   locationType = LocationType.START;
+               } else if (_trip.getNumLocations() == 1) {
+                   locationType = LocationType.END;
+               }
 
-                Location location = LocationConverter.PlaceToLocation(place);
-                String rating = "";
-                if (place.getRating() != null){
-                    rating = String.format("Rating: %s/5, ", place.getRating());
-                }
-                if (_trip.getNumLocations() == 0) {
-                    _trip.addStartLocation(LocationConverter.PlaceToLocation(place));
-                    markerOptions.icon(BitmapDescriptorFactory
-                            .defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-                    markerOptions.snippet(rating + "Start");
-                    _autocompleteFragment.setHint("Add end location");
-                } else if (_trip.getNumLocations() == 1) {
-                    _trip.addEndLocation(LocationConverter.PlaceToLocation(place));
-                    markerOptions.icon(BitmapDescriptorFactory
-                            .defaultMarker(BitmapDescriptorFactory.HUE_RED));
-                    markerOptions.snippet("Destination");
-                    markerOptions.snippet(rating + "Destination");
-                    _autocompleteFragment.setHint("Add stop");
-                } else {
-                    _trip.addLocation(location);
-                    markerOptions.icon(BitmapDescriptorFactory
-                            .defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
-                    if (rating != ""){
-                        markerOptions.snippet(rating.substring(0, rating.length() - 2));
+               addPlaceToMapAndTrip(place, locationType, true);
+
+               if (_tripEntity.placeIds == null) {
+                   _tripEntity.placeIds = new ArrayList<>();
+               }
+
+               _tripEntity.placeIds.add(place.getId());
+               _executor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.v("Update", "Trip updated");
+                        _tripDao.updateTrips(_tripEntity);
                     }
-                }
-
-                _locationsListAdapter.notifyDataSetChanged();
-
-                _map.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 4f));
-                _markerMap.put(place.getId(), _map.addMarker(markerOptions));
-
-                createRoute();
+               });
             }
 
             @Override
@@ -177,8 +148,74 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
             _geoApiContext =
                     new GeoApiContext.Builder().apiKey("AIzaSyDXx6nHhNO_jNJiFm0ZMp7KPOSK6USBBEg").build();
         }
-
     }
+
+    private void tripDependentInit() {
+        RecyclerView locationsList = findViewById(R.id.locations_list_recycler_view);
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        locationsList.setLayoutManager(layoutManager);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(locationsList.getContext(),
+                layoutManager.getOrientation());
+        locationsList.addItemDecoration(dividerItemDecoration);
+
+        _locationsListAdapter = new LocationsListAdapter(this, _trip.getLocations(), this);
+        locationsList.setAdapter(_locationsListAdapter);
+
+        _bottomSheetBehavior = BottomSheetBehavior.from(findViewById(R.id.locations_list));
+
+        TextView textViewTripName = findViewById(R.id.itineraryTextViewTripName);
+        textViewTripName.setText(_trip.getName().trim());
+
+        String autoCompleteHint = "Add stop";
+        if (_tripEntity.placeIds == null || _tripEntity.placeIds.size() == 0){
+            autoCompleteHint = "Add start location";
+        } else if(_tripEntity.placeIds.size() == 1) {
+            autoCompleteHint = "Add end location";
+        }
+
+        _autocompleteFragment.setHint(autoCompleteHint);
+    }
+
+    private void addPlaceToMapAndTrip(Place place, LocationType locationType, boolean createRoute) {
+        MarkerOptions markerOptions =
+                new MarkerOptions().position(place.getLatLng()).title(place.getName());
+
+        Location location = new Location(place);
+        String rating = "";
+        if (place.getRating() != null){
+            rating = String.format("Rating: %s/5, ", place.getRating());
+        }
+        if (locationType == LocationType.START) {
+            markerOptions.icon(BitmapDescriptorFactory
+                    .defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+            markerOptions.snippet(rating + "Start");
+            _autocompleteFragment.setHint("Add end location");
+        } else if (locationType == LocationType.END) {
+            markerOptions.icon(BitmapDescriptorFactory
+                    .defaultMarker(BitmapDescriptorFactory.HUE_RED));
+            markerOptions.snippet("Destination");
+            markerOptions.snippet(rating + "Destination");
+            _autocompleteFragment.setHint("Add stop");
+        } else {
+            markerOptions.icon(BitmapDescriptorFactory
+                    .defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
+            if (!rating.equals("")){
+                markerOptions.snippet(rating.substring(0, rating.length() - 2));
+            }
+        }
+
+        _trip.addLocation(location);
+        _locationsListAdapter.notifyDataSetChanged();
+
+        _map.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 4f));
+        _markerMap.put(place.getId(), _map.addMarker(markerOptions));
+
+        if (createRoute) {
+            createRoute();
+        }
+    }
+
 
     private void createRoute() {
         if (_trip.getNumLocations() <= 1) {
@@ -255,6 +292,56 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         });
     }
 
+    private void generateTripFromTripEntity() {
+        _trip = new Trip(_tripEntity.tripName);
+        _trip.setImages(_tripEntity.imageUrls);
+        _trip.setNoteIds(_tripEntity.noteIds);
+
+        if (_tripEntity.placeIds == null) {
+            Log.v("YO", "Place null");
+            return;
+        }
+
+        for(int i = 0; i < _tripEntity.placeIds.size(); i++){
+            Log.v("YO", "Place not null?");
+            String placeId = _tripEntity.placeIds.get(i);
+            final FetchPlaceRequest request = FetchPlaceRequest.newInstance(placeId,
+                    Arrays.asList(Place.Field.ID, Place.Field.NAME,
+                    Place.Field.LAT_LNG, Place.Field.ADDRESS, Place.Field.RATING));
+
+            final int finalI = i;
+
+            _placesClient.fetchPlace(request).addOnSuccessListener((fetchPlaceResponse -> {
+                Place place = fetchPlaceResponse.getPlace();
+                _tempPlaces.put(finalI, place);
+
+                attemptToUpdateMapAndTrip();
+            }));
+        }
+
+    }
+
+    // Will only update places once all places are retrieved.
+    // This is necessary because fetching places by placeid is async obviously.
+    private void attemptToUpdateMapAndTrip() {
+        Log.v("YO", "ATTEMPT");
+        if (_tripEntity.placeIds.size() == _tempPlaces.size()) {
+            Log.v("YO", "SUCEED");
+            for(int i = 0; i < _tempPlaces.size(); i++){
+                LocationType locationType = LocationType.MIDDLE;
+                if (i == 0){
+                    locationType = LocationType.START;
+                } else if (i == _trip.getNumLocations() - 1) {
+                    locationType = LocationType.END;
+                }
+
+                addPlaceToMapAndTrip(_tempPlaces.get(i), locationType, false);
+            }
+
+            createRoute();
+        }
+    }
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         _map = googleMap;
@@ -264,6 +351,15 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
     public void onStopDeleted(String placeId) {
         _trip.removeLocation(placeId);
         _locationsListAdapter.notifyDataSetChanged();
+
+        _tripEntity.placeIds.remove(placeId);
+        _executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                _tripDao.updateTrips(_tripEntity);
+            }
+        });
+
         _markerMap.get(placeId).remove();
         _markerMap.remove(placeId);
         createRoute();

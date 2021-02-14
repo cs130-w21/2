@@ -95,7 +95,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             final String selectedTripName = (String) listView.getItemAtPosition(position);
                             Log.v("Clicked on: ", selectedTripName);
                             Intent intent = new Intent(MainActivity.this, TripViewActivity.class);
-                            intent.putExtra("TRIP", _tripList.get(position));
+                            intent.putExtra("TRIP ID", _tripList.get(position).tripid);
+
                             startActivity(intent);
                         }
                     });
@@ -191,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 _user.tripIds.add(tripId);
                                 _userDao.updateUser(_user);
                                 Intent intent = new Intent(MainActivity.this, TripViewActivity.class);
-                                intent.putExtra("TRIP", trip);
+                                intent.putExtra("TRIP ID", tripId);
                                 startActivity(intent);
                             }
                         });
