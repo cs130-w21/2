@@ -70,10 +70,12 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
     private Trip _trip;
     // Database entity
     private TripEntity _tripEntity;
+    private boolean _firstAccess = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.v("Create", "Create");
 
         setContentView(R.layout.activity_trip_view);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -98,51 +100,17 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         _tripDao.findByID(tripId).observe(this, new Observer<TripEntity>() {
             @Override
             public void onChanged(TripEntity tripEntity) {
-                _tripEntity = tripEntity;
-                Log.v("NAME", tripEntity.tripName);
-                generateTripFromTripEntity();
-                tripDependentInit();
+                if (_firstAccess) {
+                    _tripEntity = tripEntity;
+                    Log.v("NAME", tripEntity.tripName);
+                    generateTripFromTripEntity();
+                    tripDependentInit();
+                    _firstAccess = false;
+                }
             }
         });
 
         _autocompleteFragment.setHint("Add stop");
-
-        // Specify the types of place data to return.
-        _autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME,
-                Place.Field.LAT_LNG, Place.Field.ADDRESS, Place.Field.RATING));
-
-        _autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
-            @Override
-            public void onPlaceSelected(Place place) {
-                LocationType locationType = LocationType.MIDDLE;
-               if (_trip.getNumLocations() == 0){
-                   locationType = LocationType.START;
-               } else if (_trip.getNumLocations() == 1) {
-                   locationType = LocationType.END;
-               }
-
-               addPlaceToMapAndTrip(place, locationType, true);
-
-               if (_tripEntity.placeIds == null) {
-                   _tripEntity.placeIds = new ArrayList<>();
-               }
-
-               _tripEntity.placeIds.add(place.getId());
-               _executor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        Log.v("Update", "Trip updated");
-                        _tripDao.updateTrips(_tripEntity);
-                    }
-               });
-            }
-
-            @Override
-            public void onError(Status status) {
-                // TODO: Handle the error.
-                Log.i("TAG", "An error occurred: " + status);
-            }
-        });
 
         if (_geoApiContext == null) {
             _geoApiContext =
@@ -175,6 +143,50 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         }
 
         _autocompleteFragment.setHint(autoCompleteHint);
+
+        // Specify the types of place data to return.
+        _autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME,
+                Place.Field.LAT_LNG, Place.Field.ADDRESS, Place.Field.RATING));
+
+        Log.v("Num locs", _trip.getNumLocations() + "");
+
+        _autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+                LocationType locationType = LocationType.MIDDLE;
+                if (_trip.getNumLocations() == 0){
+                    locationType = LocationType.START;
+                } else if (_trip.getNumLocations() == 1) {
+                    locationType = LocationType.END;
+                }
+
+                addPlaceToMapAndTrip(place, locationType, true);
+
+                if (_tripEntity.placeIds == null) {
+                    _tripEntity.placeIds = new ArrayList<>();
+                }
+
+                ArrayList<String> placeIds = new ArrayList<>();
+                for (Location location: _trip.getLocations()) {
+                   placeIds.add(location.getPlaceId());
+                }
+                _tripEntity.placeIds = placeIds;
+
+                _executor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.v("Update", "Trip updated");
+                        _tripDao.updateTrips(_tripEntity);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(Status status) {
+                // TODO: Handle the error.
+                Log.i("TAG", "An error occurred: " + status);
+            }
+        });
     }
 
     private void addPlaceToMapAndTrip(Place place, LocationType locationType, boolean createRoute) {
@@ -187,17 +199,20 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
             rating = String.format("Rating: %s/5, ", place.getRating());
         }
         if (locationType == LocationType.START) {
+            _trip.addStartLocation(location);
             markerOptions.icon(BitmapDescriptorFactory
                     .defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
             markerOptions.snippet(rating + "Start");
             _autocompleteFragment.setHint("Add end location");
         } else if (locationType == LocationType.END) {
+            _trip.addEndLocation(location);
             markerOptions.icon(BitmapDescriptorFactory
                     .defaultMarker(BitmapDescriptorFactory.HUE_RED));
             markerOptions.snippet("Destination");
             markerOptions.snippet(rating + "Destination");
             _autocompleteFragment.setHint("Add stop");
         } else {
+            _trip.addLocation(location);
             markerOptions.icon(BitmapDescriptorFactory
                     .defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
             if (!rating.equals("")){
@@ -205,14 +220,17 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
             }
         }
 
-        _trip.addLocation(location);
         _locationsListAdapter.notifyDataSetChanged();
 
-        _map.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 4f));
+        _map.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 5f));
         _markerMap.put(place.getId(), _map.addMarker(markerOptions));
 
         if (createRoute) {
             createRoute();
+        }
+
+        for (Location l : _trip.getLocations()) {
+            Log.v("locs", l.getName());
         }
     }
 
@@ -324,18 +342,24 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
     // Will only update places once all places are retrieved.
     // This is necessary because fetching places by placeid is async obviously.
     private void attemptToUpdateMapAndTrip() {
-        Log.v("YO", "ATTEMPT");
         if (_tripEntity.placeIds.size() == _tempPlaces.size()) {
-            Log.v("YO", "SUCEED");
+            // Reorder the places so the destination is second for addPlaceTMT()
+            Place[] reorderedPlaces =  new Place[_tempPlaces.size()];
+            reorderedPlaces[0] = _tempPlaces.get(0);
+            reorderedPlaces[1] = _tempPlaces.get(_tempPlaces.size() - 1);
+            for (int i = 1; i < _tempPlaces.size() - 1; i++) {
+                reorderedPlaces[i + 1] = _tempPlaces.get(i);
+            }
+
             for(int i = 0; i < _tempPlaces.size(); i++){
                 LocationType locationType = LocationType.MIDDLE;
                 if (i == 0){
                     locationType = LocationType.START;
-                } else if (i == _trip.getNumLocations() - 1) {
+                } else if (i == 1) {
                     locationType = LocationType.END;
                 }
 
-                addPlaceToMapAndTrip(_tempPlaces.get(i), locationType, false);
+                addPlaceToMapAndTrip(reorderedPlaces[i], locationType, false);
             }
 
             createRoute();

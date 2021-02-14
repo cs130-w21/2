@@ -17,6 +17,14 @@ public class Trip {
 
     public Trip(Location start, Location end){}
 
+    public void addStartLocation(Location location) {
+        this._locations.add(location);
+    }
+
+    public void addEndLocation(Location location) {
+        this._locations.add(location);
+    }
+
     public Location getStartLocation() {
         return _locations.get(0);
     }
