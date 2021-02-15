@@ -10,7 +10,7 @@ import androidx.room.Update;
 @Dao
 public interface UserDao {
     @Query("SELECT * FROM userentity WHERE email LIKE :email")
-    LiveData<UserEntity> findByEmail(String email);
+    UserEntity findByEmail(String email);
 
     @Update
     void updateUser(UserEntity user);

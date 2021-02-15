@@ -63,7 +63,7 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
     private TextView _startLocationTextView;
     private TextView _destinationTextView;
 
-    enum  LocationType {
+    enum LocationType {
         START,
         END,
         MIDDLE,
@@ -72,7 +72,6 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
     private Trip _trip;
     // Database entity
     private TripEntity _tripEntity;
-    private boolean _firstAccess = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,19 +96,14 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         _db = DatabaseSingleton.getInstance(this);
         _tripDao = _db.tripDao();
 
-        Long tripId =  (Long) getIntent().getSerializableExtra("TRIP ID");
-
-        _tripDao.findByID(tripId).observe(this, new Observer<TripEntity>() {
-            @Override
-            public void onChanged(TripEntity tripEntity) {
-                if (_firstAccess) {
-                    _tripEntity = tripEntity;
-                    Log.v("NAME", tripEntity.tripName);
-                    generateTripFromTripEntity();
-                    tripDependentInit();
-                    _firstAccess = false;
-                }
-            }
+        Long tripId = (Long) getIntent().getLongExtra("TRIP ID", 0);
+        Log.v("ID", tripId + "");
+        _executor.execute(() -> {
+            TripEntity tripEntity = _tripDao.findByID(tripId);
+            _tripEntity = tripEntity;
+            Log.v("NAME", tripEntity.tripName);
+            generateTripFromTripEntity();
+            tripDependentInit();
         });
 
         _startLocationTextView = findViewById(R.id.locations_list_start);
@@ -141,9 +135,9 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         textViewTripName.setText(_trip.getName().trim());
 
         String autoCompleteHint = "Add stop";
-        if (_tripEntity.placeIds == null || _tripEntity.placeIds.size() == 0){
+        if (_tripEntity.placeIds == null || _tripEntity.placeIds.size() == 0) {
             autoCompleteHint = "Add start location";
-        } else if(_tripEntity.placeIds.size() == 1) {
+        } else if (_tripEntity.placeIds.size() == 1) {
             autoCompleteHint = "Add end location";
         }
 
@@ -159,7 +153,7 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
             @Override
             public void onPlaceSelected(Place place) {
                 LocationType locationType = LocationType.MIDDLE;
-                if (_trip.getNumLocations() == 0){
+                if (_trip.getNumLocations() == 0) {
                     locationType = LocationType.START;
                 } else if (_trip.getNumLocations() == 1) {
                     locationType = LocationType.END;
@@ -168,7 +162,7 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
                 addPlaceToMapAndTrip(place, locationType, true);
 
                 ArrayList<String> placeIds = new ArrayList<>();
-                for(Location location: _trip.getLocations()) {
+                for (Location location : _trip.getLocations()) {
                     placeIds.add(location.getPlaceId());
                 }
 
@@ -191,7 +185,7 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
 
         Location location = new Location(place);
         String rating = "";
-        if (place.getRating() != null){
+        if (place.getRating() != null) {
             rating = String.format("Rating: %s/5, ", place.getRating());
         }
         if (locationType == LocationType.START) {
@@ -213,7 +207,7 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
             _trip.addLocation(location);
             markerOptions.icon(BitmapDescriptorFactory
                     .defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
-            if (!rating.equals("")){
+            if (!rating.equals("")) {
                 markerOptions.snippet(rating.substring(0, rating.length() - 2));
             }
         }
@@ -270,7 +264,7 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
 
                         DirectionsRoute route = result.routes[0];
 
-                        for (int i = 1;  i < _trip.getNumLocations(); i++) {
+                        for (int i = 1; i < _trip.getNumLocations(); i++) {
                             _trip.getLocations().get(i).setDuration(route.legs[i - 1].duration.humanReadable);
                         }
 
@@ -318,12 +312,12 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
             return;
         }
 
-        for(int i = 0; i < _tripEntity.placeIds.size(); i++){
+        for (int i = 0; i < _tripEntity.placeIds.size(); i++) {
             Log.v("YO", "Place not null?");
             String placeId = _tripEntity.placeIds.get(i);
             final FetchPlaceRequest request = FetchPlaceRequest.newInstance(placeId,
                     Arrays.asList(Place.Field.ID, Place.Field.NAME,
-                    Place.Field.LAT_LNG, Place.Field.ADDRESS, Place.Field.RATING));
+                            Place.Field.LAT_LNG, Place.Field.ADDRESS, Place.Field.RATING));
 
             final int finalI = i;
 
@@ -340,18 +334,21 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
     // Will only update places once all places are retrieved.
     // This is necessary because fetching places by placeid is async obviously.
     private void attemptToUpdateMapAndTrip() {
-        if (_tripEntity.placeIds.size() == _tempPlaces.size()) {
+        if (_tripEntity.placeIds.size() != 0 && _tripEntity.placeIds.size() == _tempPlaces.size()) {
             // Reorder the places so the destination is second for addPlaceTMT()
-            Place[] reorderedPlaces =  new Place[_tempPlaces.size()];
+            Place[] reorderedPlaces = new Place[_tempPlaces.size()];
             reorderedPlaces[0] = _tempPlaces.get(0);
-            reorderedPlaces[1] = _tempPlaces.get(_tempPlaces.size() - 1);
+            if (_tempPlaces.size() > 1) {
+                reorderedPlaces[1] = _tempPlaces.get(_tempPlaces.size() - 1);
+            }
+
             for (int i = 1; i < _tempPlaces.size() - 1; i++) {
                 reorderedPlaces[i + 1] = _tempPlaces.get(i);
             }
 
-            for(int i = 0; i < _tempPlaces.size(); i++){
+            for (int i = 0; i < _tempPlaces.size(); i++) {
                 LocationType locationType = LocationType.MIDDLE;
-                if (i == 0){
+                if (i == 0) {
                     locationType = LocationType.START;
                 } else if (i == 1) {
                     locationType = LocationType.END;

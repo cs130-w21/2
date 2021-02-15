@@ -12,10 +12,10 @@ import java.util.List;
 @Dao
 public interface TripDao {
     @Query("SELECT * FROM tripentity WHERE tripid LIKE :trip_id")
-    LiveData<TripEntity> findByID(Long trip_id);
+    TripEntity findByID(Long trip_id);
 
     @Query("SELECT * FROM tripentity WHERE trip_name LIKE :trip_name")
-    LiveData<TripEntity> findByName(String trip_name);
+    TripEntity findByName(String trip_name);
 
     @Update
     void updateTrips(TripEntity... trips);
