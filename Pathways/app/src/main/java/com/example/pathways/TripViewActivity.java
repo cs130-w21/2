@@ -167,11 +167,12 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
 
                 addPlaceToMapAndTrip(place, locationType, true);
 
-                if (_tripEntity.placeIds == null) {
-                    _tripEntity.placeIds = new ArrayList<>();
+                ArrayList<String> placeIds = new ArrayList<>();
+                for(Location location: _trip.getLocations()) {
+                    placeIds.add(location.getPlaceId());
                 }
 
-                _tripEntity.placeIds.add(_tripEntity.placeIds.size() - 1, place.getId());
+                _tripEntity.placeIds = placeIds;
 
                 _executor.execute(() -> _tripDao.updateTrips(_tripEntity));
             }
