@@ -67,9 +67,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setSupportActionBar(toolbar);
 
         final String email = getIntent().getStringExtra("EMAIL");
-        _userDao.findByEmail(email).observe(this, new Observer<UserEntity>() {
+        _executor.execute(new Runnable() {
             @Override
-            public void onChanged(UserEntity userEntity) {
+            public void run() {
+                UserEntity userEntity = _userDao.findByEmail(email);
                 if (userEntity == null) {
                     Log.v("New User Email: ", email);
                     _user = new UserEntity();
@@ -88,18 +89,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     final ListView listView = findViewById(R.id.trip_list);
                     _arrayAdapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, _tripNameList);
                     Log.v("Trip Name List", _tripNameList.toString());
-                    listView.setAdapter(_arrayAdapter);
-                    listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                            final String selectedTripName = (String) listView.getItemAtPosition(position);
-                            Log.v("Clicked on: ", selectedTripName);
-                            Intent intent = new Intent(MainActivity.this, TripViewActivity.class);
-                            intent.putExtra("TRIP ID", _tripList.get(position).tripid);
 
-                            startActivity(intent);
-                        }
+                    runOnUiThread(() -> {
+                        listView.setAdapter(_arrayAdapter);
+                        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                final String selectedTripName = (String) listView.getItemAtPosition(position);
+                                Log.v("Clicked on: ", selectedTripName);
+                                Intent intent = new Intent(MainActivity.this, TripViewActivity.class);
+                                intent.putExtra("TRIP ID", _tripList.get(position).tripid);
+
+                                startActivity(intent);
+                            }
+                        });
                     });
+
                 }
             }
         });
@@ -125,9 +130,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         _fab3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!_isFabOpen){
+                if (!_isFabOpen) {
                     showFABMenu();
-                }else{
+                } else {
                     closeFABMenu();
                 }
             }
@@ -146,9 +151,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-
     private void populateTrips(UserEntity userEntity) {
-        if(userEntity == null || userEntity.tripIds == null){
+        if (userEntity == null || userEntity.tripIds == null) {
             Log.e("populateTrips: ", "User null");
             return;
         }
@@ -156,15 +160,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         _tripList.clear();
         List<Long> trip_id_list = userEntity.tripIds;
         Log.v("Trip ID list: ", trip_id_list.toString());
-        for(Long trip_id: trip_id_list){
-            _tripDao.findByID(trip_id).observe(this, new Observer<TripEntity>() {
+        for (Long trip_id : trip_id_list) {
+            _executor.execute(new Runnable() {
                 @Override
-                public void onChanged(TripEntity tripEntity) {
+                public void run() {
+                    TripEntity tripEntity = _tripDao.findByID(trip_id);
                     _tripList.add(tripEntity);
                     _tripNameList.add(tripEntity.tripName);
-                    _arrayAdapter.notifyDataSetChanged();
-                }
-            });
+                    runOnUiThread(() -> _arrayAdapter.notifyDataSetChanged());
+                }});
         }
     }
 
@@ -186,7 +190,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             public void run() {
                                 Log.v("Inserting trip: ", trip.tripName);
                                 Long tripId = _tripDao.insert(trip);
-                                if (_user.tripIds == null){
+                                _tripList.add(trip);
+                                _tripNameList.add(trip.tripName);
+
+                                for (String tripName : _tripNameList) {
+                                    Log.v("TRIPNAME", tripName);
+                                }
+                                runOnUiThread(() -> _arrayAdapter.notifyDataSetChanged());
+
+                                if (_user.tripIds == null) {
                                     _user.tripIds = new ArrayList<Long>();
                                 }
                                 _user.tripIds.add(tripId);
@@ -204,15 +216,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dialog.show();
     }
 
-    private void showFABMenu(){
-        _isFabOpen =true;
+    private void showFABMenu() {
+        _isFabOpen = true;
         _tripFab.animate().translationY(-getResources().getDimension(R.dimen.standard_60));
         _fab2.animate().translationY(-getResources().getDimension(R.dimen.standard_120));
         _noteFab.animate().translationY(-getResources().getDimension(R.dimen.standard_180));
     }
 
-    private void closeFABMenu(){
-        _isFabOpen =false;
+    private void closeFABMenu() {
+        _isFabOpen = false;
         _tripFab.animate().translationY(0);
         _fab2.animate().translationY(0);
         _noteFab.animate().translationY(0);
