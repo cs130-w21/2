@@ -60,6 +60,8 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
     private HashMap<String, Marker> _markerMap = new HashMap<>();
     private Executor _executor = Executors.newSingleThreadExecutor();
     private HashMap<Integer, Place> _tempPlaces = new HashMap<>();
+    private TextView _startLocationTextView;
+    private TextView _destinationTextView;
 
     enum  LocationType {
         START,
@@ -109,6 +111,9 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
                 }
             }
         });
+
+        _startLocationTextView = findViewById(R.id.locations_list_start);
+        _destinationTextView = findViewById(R.id.locations_list_end);
 
         _autocompleteFragment.setHint("Add stop");
 
@@ -166,19 +171,9 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
                     _tripEntity.placeIds = new ArrayList<>();
                 }
 
-                ArrayList<String> placeIds = new ArrayList<>();
-                for (Location location: _trip.getLocations()) {
-                   placeIds.add(location.getPlaceId());
-                }
-                _tripEntity.placeIds = placeIds;
+                _tripEntity.placeIds.add(_tripEntity.placeIds.size() - 1, place.getId());
 
-                _executor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        Log.v("Update", "Trip updated");
-                        _tripDao.updateTrips(_tripEntity);
-                    }
-                });
+                _executor.execute(() -> _tripDao.updateTrips(_tripEntity));
             }
 
             @Override
@@ -204,6 +199,7 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
                     .defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
             markerOptions.snippet(rating + "Start");
             _autocompleteFragment.setHint("Add end location");
+            _startLocationTextView.setText(location.getName());
         } else if (locationType == LocationType.END) {
             _trip.addEndLocation(location);
             markerOptions.icon(BitmapDescriptorFactory
@@ -211,6 +207,7 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
             markerOptions.snippet("Destination");
             markerOptions.snippet(rating + "Destination");
             _autocompleteFragment.setHint("Add stop");
+            _destinationTextView.setText(location.getName());
         } else {
             _trip.addLocation(location);
             markerOptions.icon(BitmapDescriptorFactory
