@@ -15,6 +15,8 @@ import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -46,8 +48,10 @@ public class LoginActivity extends AppCompatActivity {
         // Check if user is signed in (non-null) and update UI accordingly.
         if (auth.getCurrentUser() != null) {
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             intent.putExtra("EMAIL", auth.getCurrentUser().getEmail());
             startActivity(intent);
+            ActivityCompat.finishAffinity(LoginActivity.this);
         }
     }
 
@@ -83,7 +87,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void register(String email, String password) {
-        if(!validate()){
+        if (!validate()) {
             return;
         }
         _progressBar.setVisibility(View.VISIBLE);
@@ -96,12 +100,14 @@ public class LoginActivity extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "createUserWithEmail:success");
                             FirebaseUser user = auth.getCurrentUser();
+                            Toast.makeText(LoginActivity.this, "Registration successful. You may now login.",
+                                    Toast.LENGTH_LONG).show();
                             //updateUI(user);
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
                             Toast.makeText(LoginActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
+                                    Toast.LENGTH_LONG).show();
                             //updateUI(null);
                         }
                         _progressBar.setVisibility(View.GONE);
@@ -110,7 +116,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void login(String email, String password) {
-        if(!validate()){
+        if (!validate()) {
             return;
         }
         _progressBar.setVisibility(View.VISIBLE);
@@ -119,10 +125,12 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        if(task.isSuccessful()){
+                        if (task.isSuccessful()) {
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             intent.putExtra("EMAIL", email);
                             startActivity(intent);
+                            ActivityCompat.finishAffinity(LoginActivity.this);
                         } else {
                             if (task.getException() != null) {
                                 Toast.makeText(getApplicationContext(), task.getException().getMessage() + " " + "Please try again.", Toast.LENGTH_SHORT).show();
