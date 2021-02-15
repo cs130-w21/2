@@ -96,8 +96,8 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         _db = DatabaseSingleton.getInstance(this);
         _tripDao = _db.tripDao();
 
-        Long tripId = (Long) getIntent().getSerializableExtra("TRIP ID");
-
+        Long tripId = (Long) getIntent().getLongExtra("TRIP ID", 0);
+        Log.v("ID", tripId + "");
         _executor.execute(() -> {
             TripEntity tripEntity = _tripDao.findByID(tripId);
             _tripEntity = tripEntity;
@@ -334,11 +334,14 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
     // Will only update places once all places are retrieved.
     // This is necessary because fetching places by placeid is async obviously.
     private void attemptToUpdateMapAndTrip() {
-        if (_tripEntity.placeIds.size() == _tempPlaces.size()) {
+        if (_tripEntity.placeIds.size() != 0 && _tripEntity.placeIds.size() == _tempPlaces.size()) {
             // Reorder the places so the destination is second for addPlaceTMT()
             Place[] reorderedPlaces = new Place[_tempPlaces.size()];
             reorderedPlaces[0] = _tempPlaces.get(0);
-            reorderedPlaces[1] = _tempPlaces.get(_tempPlaces.size() - 1);
+            if (_tempPlaces.size() > 1) {
+                reorderedPlaces[1] = _tempPlaces.get(_tempPlaces.size() - 1);
+            }
+
             for (int i = 1; i < _tempPlaces.size() - 1; i++) {
                 reorderedPlaces[i + 1] = _tempPlaces.get(i);
             }

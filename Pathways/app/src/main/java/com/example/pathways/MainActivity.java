@@ -190,12 +190,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             public void run() {
                                 Log.v("Inserting trip: ", trip.tripName);
                                 Long tripId = _tripDao.insert(trip);
+                                trip.tripid = tripId;
                                 _tripList.add(trip);
                                 _tripNameList.add(trip.tripName);
 
-                                for (String tripName : _tripNameList) {
-                                    Log.v("TRIPNAME", tripName);
-                                }
                                 runOnUiThread(() -> _arrayAdapter.notifyDataSetChanged());
 
                                 if (_user.tripIds == null) {
