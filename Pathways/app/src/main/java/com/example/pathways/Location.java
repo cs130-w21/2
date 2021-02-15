@@ -1,5 +1,7 @@
 package com.example.pathways;
 
+import com.google.android.libraries.places.api.model.Place;
+
 public class Location {
     private String _name;
     private String _address;
@@ -10,14 +12,28 @@ public class Location {
     private String _placeId;
 
 
-    private Location(Builder builder) {
-        this._name = builder.name;
-        this._address = builder.address;
-        this._latitude = builder.latitude;
-        this._longitude = builder.longitude;
-        this._duration = builder.duration;
-        this._rating = builder.rating;
-        this._placeId = builder.placeId;
+    public Location() {
+
+    }
+
+    public Location (Place place) {
+        String rating = "";
+        if (place.getRating() != null) {
+            rating = place.getRating() + "";
+        }
+
+        String address = "";
+        if (place.getAddress() != null) {
+            address = place.getAddress();
+        }
+
+        this._name = place.getName();
+        this._address = address;
+        this._latitude = place.getLatLng().latitude;
+        this._longitude = place.getLatLng().longitude;
+        this._duration = "";
+        this._rating = rating;
+        this._placeId = place.getId();
     }
 
     public String getName() {
@@ -74,54 +90,5 @@ public class Location {
 
     public void setPlaceId(String placeId) {
         this._placeId = placeId;
-    }
-
-    public static class Builder {
-        private String name;
-        private String address;
-        private double latitude;
-        private double longitude;
-        private String duration = "";
-        private String rating = "";
-        private String placeId;
-
-        public Location build() {
-            return new Location(this);
-        }
-
-        public Builder setName(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public Builder setAddress(String address) {
-            this.address = address;
-            return this;
-        }
-
-        public Builder setLatitude(double latitude) {
-            this.latitude = latitude;
-            return this;
-        }
-
-        public Builder setLongitude(double longitude) {
-            this.longitude = longitude;
-            return this;
-        }
-
-        public Builder setDuration(String duration) {
-            this.duration = duration;
-            return this;
-        }
-
-        public Builder setRating(String rating) {
-            this.rating = rating;
-            return this;
-        }
-
-        public Builder setPlaceId(String placeId) {
-            this.placeId = placeId;
-            return this;
-        }
     }
 }

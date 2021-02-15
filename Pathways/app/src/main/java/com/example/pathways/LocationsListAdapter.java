@@ -61,7 +61,7 @@ public class LocationsListAdapter extends RecyclerView.Adapter<LocationsListAdap
         }
 
         holder._textViewStopAddress.setVisibility(View.GONE);
-        if(location.getAddress() != null) {
+        if(location.getAddress() != null && !location.getAddress().equals("")) {
             holder._textViewStopAddress.setVisibility(View.VISIBLE);
             holder._textViewStopAddress.setText(location.getAddress());
         }
@@ -69,7 +69,7 @@ public class LocationsListAdapter extends RecyclerView.Adapter<LocationsListAdap
         holder._textViewStopName.setText(location.getName());
         holder._textViewDuration.setText(location.getDuration());
 
-        if (location.getRating().equals("" + -1d)) {
+        if (location.getRating().equals("" + -1d) || location.getRating().equals("")) {
             holder._textViewRating.setVisibility(View.GONE);
         } else {
             holder._textViewRating.setText(location.getRating());
