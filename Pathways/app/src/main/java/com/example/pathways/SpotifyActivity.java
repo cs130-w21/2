@@ -1,6 +1,12 @@
 package com.example.pathways;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.cursoradapter.widget.CursorAdapter;
+import androidx.cursoradapter.widget.SimpleCursorAdapter;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.SearchManager;
 import android.content.Context;
@@ -12,33 +18,60 @@ import android.provider.BaseColumns;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.widget.CursorAdapter;
-import android.widget.SearchView;
-import android.widget.SimpleCursorAdapter;
 
+import com.google.gson.Gson;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
 
-import com.spotify.protocol.types.Track;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
+import kaaes.spotify.webapi.android.models.Image;
+import kaaes.spotify.webapi.android.models.Playlist;
+import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.TracksPager;
+import kaaes.spotify.webapi.android.models.UserPrivate;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 
-public class SpotifyActivity extends AppCompatActivity {
+public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapter.AdapterCallbacks {
     private static final String CLIENT_ID = "6e6189c30dfb45c2b04f74db3c832444";
     private static final String REDIRECT_URI = "https://www.google.com";
     private SpotifyAppRemote _spotifyAppRemote;
 
     private static final int REQUEST_CODE = 1337;
     private SpotifyApi _webApi = new SpotifyApi();
+    private SpotifyService _webSpotify;
+    private String _playListId = "";
+    private String _spotifyId = "";
+    private Gson _gson = new Gson();
+    private ArrayList<SongInfo> _songInfos = new ArrayList<>();
+    private PlaylistAdapter _playlistAdapter;
+
+    class SongInfo {
+        public String imageUrl;
+        public String artist;
+        public String albumName;
+        public String trackName;
+        public String spotifyUri;
+
+        public SongInfo(String imageUrl, String artist, String albumName, String trackName, String spotifyUri) {
+            this.imageUrl = imageUrl;
+            this.artist = artist;
+            this.albumName = albumName;
+            this.trackName = trackName;
+            this.spotifyUri = spotifyUri;
+        }
+    }
 
 
     @Override
@@ -46,12 +79,24 @@ public class SpotifyActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_spotify);
         handleIntent(getIntent());
+
+        RecyclerView playlist = findViewById(R.id.playlist_recycler_view);
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        playlist.setLayoutManager(layoutManager);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(playlist.getContext(),
+                layoutManager.getOrientation());
+        playlist.addItemDecoration(dividerItemDecoration);
+
+        _playlistAdapter = new PlaylistAdapter(this, _songInfos, this);
+        playlist.setAdapter(_playlistAdapter);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.spotify_search, menu);
+        super.onCreateOptionsMenu(menu);
+
+        getMenuInflater().inflate(R.menu.spotify_search, menu);
 
         // Associate searchable configuration with the SearchView
         SearchManager searchManager =
@@ -80,21 +125,42 @@ public class SpotifyActivity extends AppCompatActivity {
                 CursorAdapter c = searchView.getSuggestionsAdapter();
                 Cursor cur = c.getCursor();
                 cur.move(i);
-                String uri = cur.getString(cur.getColumnIndex(SearchManager.SUGGEST_COLUMN_INTENT_DATA));
-                _spotifyAppRemote.getPlayerApi().play(uri);
-                // Subscribe to PlayerState
-                _spotifyAppRemote.getPlayerApi()
-                        .subscribeToPlayerState()
-                        .setEventCallback(playerState -> {
-                            final Track track = playerState.track;
-                            if (track != null) {
-                                Log.d("MainActivity", track.name + " by " + track.artist.name);
-                            }
-                        });
+
+                Track track = _gson.fromJson(cur.getString(
+                        cur.getColumnIndex(SearchManager.SUGGEST_COLUMN_INTENT_DATA)), Track.class);
+
+                String imageUrl = "";
+                for (Image image : track.album.images) {
+                    if (image.width == 300) {
+                        imageUrl = image.url;
+                    }
+                }
+
+                String artist = track.artists.get(0).name;
+                String albumName = track.album.name;
+                String trackName = track.name;
+                String spotifyUri = track.uri;
+
+                SongInfo songInfo = new SongInfo(imageUrl, artist, albumName, trackName, spotifyUri);
+                _songInfos.add(songInfo);
+                _playlistAdapter.notifyDataSetChanged();
+
+
+//                _spotifyAppRemote.getPlayerApi().play(uri);
+//                // Subscribe to PlayerState
+//                _spotifyAppRemote.getPlayerApi()
+//                        .subscribeToPlayerState()
+//                        .setEventCallback(playerState -> {
+//                            final Track track = playerState.track;
+//                            if (track != null) {
+//                                Log.d("MainActivity", track.name + " by " + track.artist.name);
+//                            }
+//                        });
 
                 return false;
             }
         });
+
         searchView.setSuggestionsAdapter(suggestionAdapter);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -106,8 +172,7 @@ public class SpotifyActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextChange(String newText) {
                 // Put your magic here
-                SpotifyService webSpotify = _webApi.getService();
-                webSpotify.searchTracks(newText, new Callback<TracksPager>() {
+                _webSpotify.searchTracks(newText, new Callback<TracksPager>() {
                     @Override
                     public void success(TracksPager tracksPager, Response response) {
                         String[] columns = {
@@ -118,9 +183,12 @@ public class SpotifyActivity extends AppCompatActivity {
 
                         MatrixCursor cursor = new MatrixCursor(columns);
 
-                        Log.d("Success", "Success");
                         for (int i = 0; i < tracksPager.tracks.items.size(); i++) {
-                            String[] tmp = {i + "",  tracksPager.tracks.items.get(i).name, tracksPager.tracks.items.get(i).uri};
+                            Track track = tracksPager.tracks.items.get(i);
+                            String trackJson = _gson.toJson(track);
+
+
+                            String[] tmp = {i + "", tracksPager.tracks.items.get(i).name, trackJson};
                             cursor.addRow(tmp);
                         }
 
@@ -164,7 +232,7 @@ public class SpotifyActivity extends AppCompatActivity {
         AuthenticationRequest.Builder builder =
                 new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
 
-        builder.setScopes(new String[]{"streaming"});
+        builder.setScopes(new String[]{"streaming", "playlist-modify-private"});
         AuthenticationRequest request = builder.build();
 
         AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
@@ -204,6 +272,19 @@ public class SpotifyActivity extends AppCompatActivity {
                     // Handle successful response
                     String accessToken = response.getAccessToken();
                     _webApi.setAccessToken(accessToken);
+                    _webSpotify = _webApi.getService();
+
+                    _webSpotify.getMe(new Callback<UserPrivate>() {
+                        @Override
+                        public void success(UserPrivate userPrivate, Response response) {
+                            _spotifyId = userPrivate.id;
+                        }
+
+                        @Override
+                        public void failure(RetrofitError error) {
+
+                        }
+                    });
 
                     // Set the connection parameters
                     ConnectionParams connectionParams =
@@ -239,9 +320,28 @@ public class SpotifyActivity extends AppCompatActivity {
                     break;
 
                 // Most likely auth flow was cancelled
-                default:
+                default: 
                     // Handle other cases
             }
         }
+    }
+
+    @Override
+    public void onSongDeleted(int index) {
+
+    }
+
+    @Override
+    public void onItemClicked(int index) {
+        _spotifyAppRemote.getPlayerApi().play(_songInfos.get(index).spotifyUri);
+                // Subscribe to PlayerState
+                _spotifyAppRemote.getPlayerApi()
+                        .subscribeToPlayerState()
+                        .setEventCallback(playerState -> {
+                            final com.spotify.protocol.types.Track track = playerState.track;
+                            if (track != null) {
+                                Log.d("SpotifyActivity", track.name + " by " + track.artist.name);
+                            }
+                        });
     }
 }
