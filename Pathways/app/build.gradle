@@ -48,4 +48,6 @@ dependencies {
     implementation 'com.android.support:multidex:2.0.1'
     implementation project(':spotify-app-remote-release-0.7.1')
     implementation "com.google.code.gson:gson:2.8.6"
+    implementation 'com.spotify.android:auth:1.1.0'
+    implementation 'com.github.kaaes:spotify-web-api-android:0.4.1'
 }

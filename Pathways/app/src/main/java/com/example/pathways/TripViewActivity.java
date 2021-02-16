@@ -65,7 +65,7 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
     private HashMap<Integer, Place> _tempPlaces = new HashMap<>();
     private TextView _startLocationTextView;
     private TextView _destinationTextView;
-    FloatingActionButton  _imageFab, _menuFab, _noteFab;
+    FloatingActionButton  _imageFab, _menuFab, _musicFab, _noteFab;
     private boolean _isFabOpen = false;
 
     enum LocationType {
@@ -148,6 +148,15 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(TripViewActivity.this, NoteView.class);
+                startActivity(intent);
+            }
+        });
+
+        _musicFab = findViewById(R.id.music_button);
+        _musicFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(TripViewActivity.this, SpotifyActivity.class);
                 startActivity(intent);
             }
         });
@@ -424,13 +433,14 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         _isFabOpen = true;
         _imageFab.animate().translationY(getResources().getDimension(R.dimen.standard_60));
         _noteFab.animate().translationY(getResources().getDimension(R.dimen.standard_120));
+        _musicFab.animate().translationY(getResources().getDimension(R.dimen.standard_180));
     }
 
     private void closeFABMenu() {
         _isFabOpen = false;
         _imageFab.animate().translationY(0);
         _noteFab.animate().translationY(0);
-
+        _musicFab.animate().translationY(0);
     }
 
     @Override
