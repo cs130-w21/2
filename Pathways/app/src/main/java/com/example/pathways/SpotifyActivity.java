@@ -5,6 +5,7 @@ import androidx.appcompat.widget.SearchView;
 import androidx.cursoradapter.widget.CursorAdapter;
 import androidx.cursoradapter.widget.SimpleCursorAdapter;
 import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -51,11 +52,10 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
     private static final int REQUEST_CODE = 1337;
     private SpotifyApi _webApi = new SpotifyApi();
     private SpotifyService _webSpotify;
-    private String _playListId = "";
-    private String _spotifyId = "";
     private Gson _gson = new Gson();
     private ArrayList<SongInfo> _songInfos = new ArrayList<>();
     private PlaylistAdapter _playlistAdapter;
+    private ItemTouchHelper _touchHelper;
 
     class SongInfo {
         public String imageUrl;
@@ -78,7 +78,6 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_spotify);
-        handleIntent(getIntent());
 
         RecyclerView playlist = findViewById(R.id.playlist_recycler_view);
 
@@ -89,6 +88,11 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
         playlist.addItemDecoration(dividerItemDecoration);
 
         _playlistAdapter = new PlaylistAdapter(this, _songInfos, this);
+        ItemTouchHelper.Callback callback =
+                new ItemMoveCallback(_playlistAdapter);
+        _touchHelper = new ItemTouchHelper(callback);
+        _touchHelper.attachToRecyclerView(playlist);
+
         playlist.setAdapter(_playlistAdapter);
     }
 
@@ -209,21 +213,6 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
         return true;
     }
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        setIntent(intent);
-        handleIntent(intent);
-    }
-
-    private void handleIntent(Intent intent) {
-        Log.v("Query", "wut");
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(SearchManager.QUERY);
-            // Do work using string
-            Log.v("Query", query);
-        }
-    }
 
     @Override
     protected void onStart() {
@@ -274,17 +263,6 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
                     _webApi.setAccessToken(accessToken);
                     _webSpotify = _webApi.getService();
 
-                    _webSpotify.getMe(new Callback<UserPrivate>() {
-                        @Override
-                        public void success(UserPrivate userPrivate, Response response) {
-                            _spotifyId = userPrivate.id;
-                        }
-
-                        @Override
-                        public void failure(RetrofitError error) {
-
-                        }
-                    });
 
                     // Set the connection parameters
                     ConnectionParams connectionParams =
@@ -320,7 +298,7 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
                     break;
 
                 // Most likely auth flow was cancelled
-                default: 
+                default:
                     // Handle other cases
             }
         }
@@ -328,7 +306,8 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
 
     @Override
     public void onSongDeleted(int index) {
-
+        _songInfos.remove(index);
+        _playlistAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -343,5 +322,10 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
                                 Log.d("SpotifyActivity", track.name + " by " + track.artist.name);
                             }
                         });
+    }
+
+    @Override
+    public void requestDrag(RecyclerView.ViewHolder viewHolder) {
+        _touchHelper.startDrag(viewHolder);
     }
 }
