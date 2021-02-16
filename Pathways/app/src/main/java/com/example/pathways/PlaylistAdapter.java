@@ -34,6 +34,8 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
 
         void onItemClicked(int index);
 
+        void onItemMoved(int oldIndex, int newIndex);
+
         void requestDrag(RecyclerView.ViewHolder viewHolder);
     }
 
@@ -90,6 +92,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
             }
         }
         notifyItemMoved(fromPosition, toPosition);
+        _callbacks.onItemMoved(fromPosition, toPosition);
     }
 
     @Override

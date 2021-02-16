@@ -2,6 +2,7 @@ package com.example.pathways;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.cursoradapter.widget.CursorAdapter;
 import androidx.cursoradapter.widget.SimpleCursorAdapter;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -19,6 +20,10 @@ import android.provider.BaseColumns;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.spotify.android.appremote.api.ConnectionParams;
@@ -28,6 +33,7 @@ import com.spotify.android.appremote.api.SpotifyAppRemote;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
 import com.spotify.sdk.android.authentication.AuthenticationResponse;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,6 +62,19 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
     private ArrayList<SongInfo> _songInfos = new ArrayList<>();
     private PlaylistAdapter _playlistAdapter;
     private ItemTouchHelper _touchHelper;
+    private int _currentSongIndex = -1;
+    private ImageButton _playPauseButton;
+    private ImageButton _previousButton;
+    private ImageButton _nextButton;
+    private TextView _artistTextView;
+    private TextView _albumTextView;
+    private TextView _songTextView;
+    private ImageView _albumArt;
+    private ConstraintLayout _playerElements;
+    private AppDatabase _db;
+    private TripDao _tripDao;
+
+    private boolean paused = true;
 
     class SongInfo {
         public String imageUrl;
@@ -78,6 +97,46 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_spotify);
+        _db = DatabaseSingleton.getInstance(this);
+
+        _playerElements = findViewById(R.id.player_elements);
+        _playerElements.setVisibility(View.GONE);
+
+        _playPauseButton = findViewById(R.id.play_button);
+        _playPauseButton.setOnClickListener((View view) -> {
+            if (paused) {
+                play(true);
+            } else {
+                pause();
+            }
+        });
+
+        _previousButton = findViewById(R.id.previous_button);
+        _previousButton.setOnClickListener((View view) -> {
+            if (_currentSongIndex != 0) {
+                _currentSongIndex -= 1;
+            }
+
+            play(false);
+
+        });
+
+        _nextButton = findViewById(R.id.next_button);
+        _nextButton.setOnClickListener((View view) -> {
+            if (_currentSongIndex == _songInfos.size() - 1) {
+                _currentSongIndex = 0;
+            } else {
+                _currentSongIndex += 1;
+            }
+
+            play(false);
+        });
+
+        _artistTextView = findViewById(R.id.player_artist_name);
+        _albumTextView = findViewById(R.id.player_album_name);
+        _songTextView = findViewById(R.id.player_tack_name);
+        _albumArt = findViewById(R.id.player_album_art);
+
 
         RecyclerView playlist = findViewById(R.id.playlist_recycler_view);
 
@@ -126,6 +185,11 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
 
             @Override
             public boolean onSuggestionClick(int i) {
+                if (_songInfos.size() == 0) {
+                    TextView empty = findViewById(R.id.empty_playlist_text);
+                    empty.setVisibility(View.GONE);
+                }
+
                 CursorAdapter c = searchView.getSuggestionsAdapter();
                 Cursor cur = c.getCursor();
                 cur.move(i);
@@ -147,19 +211,8 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
 
                 SongInfo songInfo = new SongInfo(imageUrl, artist, albumName, trackName, spotifyUri);
                 _songInfos.add(songInfo);
+
                 _playlistAdapter.notifyDataSetChanged();
-
-
-//                _spotifyAppRemote.getPlayerApi().play(uri);
-//                // Subscribe to PlayerState
-//                _spotifyAppRemote.getPlayerApi()
-//                        .subscribeToPlayerState()
-//                        .setEventCallback(playerState -> {
-//                            final Track track = playerState.track;
-//                            if (track != null) {
-//                                Log.d("MainActivity", track.name + " by " + track.artist.name);
-//                            }
-//                        });
 
                 return false;
             }
@@ -213,6 +266,37 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
         return true;
     }
 
+    private void play(boolean resume) {
+        if (_songInfos.size() == 0) {
+            return;
+        }
+
+        if (_currentSongIndex == -1) {
+            _currentSongIndex = 0;
+        }
+
+        if (_songInfos.size() == 1) {
+            _playerElements.setVisibility(View.VISIBLE);
+        }
+
+        if (resume) {
+            _spotifyAppRemote.getPlayerApi().resume();
+        } else {
+            _spotifyAppRemote.getPlayerApi().play(_songInfos.get(_currentSongIndex).spotifyUri);
+        }
+
+        SongInfo songInfo = _songInfos.get(_currentSongIndex);
+        _artistTextView.setText(songInfo.artist);
+        _albumTextView.setText(songInfo.albumName);
+        _songTextView.setText(songInfo.trackName);
+        Picasso.get().load(songInfo.imageUrl).into(_albumArt);
+
+    }
+
+    private void pause() {
+        _spotifyAppRemote.getPlayerApi().pause();
+    }
+
 
     @Override
     protected void onStart() {
@@ -227,27 +311,13 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
         AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
     }
 
-    private void connected() {
-        // Then we will write some more code here.
-//        _spotifyAppRemote.getPlayerApi().play("spotify:playlist:37i9dQZF1DX2sUQwD7tbmL");
-//        // Subscribe to PlayerState
-//        _spotifyAppRemote.getPlayerApi()
-//                .subscribeToPlayerState()
-//                .setEventCallback(playerState -> {
-//                    final Track track = playerState.track;
-//                    if (track != null) {
-//                        Log.d("MainActivity", track.name + " by " + track.artist.name);
-//                    }
-//                });
-    }
-
     @Override
     protected void onStop() {
         super.onStop();
         SpotifyAppRemote.disconnect(_spotifyAppRemote);
-
     }
 
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
 
@@ -277,15 +347,23 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
                                 @Override
                                 public void onConnected(SpotifyAppRemote spotifyAppRemote) {
                                     _spotifyAppRemote = spotifyAppRemote;
-                                    Log.d("MainActivity", "Connected! Yay!");
+                                    _spotifyAppRemote.getPlayerApi()
+                                            .subscribeToPlayerState()
+                                            .setEventCallback(playerState -> {
+                                                if (playerState.isPaused) {
+                                                    _playPauseButton.setImageResource(R.drawable.ic_baseline_play_arrow_64);
+                                                    paused = true;
+                                                } else {
+                                                    _playPauseButton.setImageResource(R.drawable.ic_baseline_pause_64);
+                                                    paused = false;
+                                                }
 
-                                    // Now you can start interacting with App Remote
-                                    connected();
+                                            });
                                 }
 
                                 @Override
                                 public void onFailure(Throwable throwable) {
-                                    Log.e("MainActivity", throwable.getMessage(), throwable);
+                                    Log.e("SpotifyActivity", throwable.getMessage(), throwable);
 
                                     // Something went wrong when attempting to connect! Handle errors here
                                 }
@@ -306,22 +384,38 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
 
     @Override
     public void onSongDeleted(int index) {
+        Log.v("WTF", index + "");
+        if (index <= _currentSongIndex) {
+            _currentSongIndex -= 1;
+            Log.v("DELETE", "i: " + index + ", cSI: " + _currentSongIndex);
+            if (index - 1 == _currentSongIndex) {
+                if (index == 0) {
+                    pause();
+                    _playerElements.setVisibility(View.GONE);
+
+                } else {
+                    play(false);
+                }
+            }
+        }
+
+
+
         _songInfos.remove(index);
         _playlistAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void onItemClicked(int index) {
-        _spotifyAppRemote.getPlayerApi().play(_songInfos.get(index).spotifyUri);
-                // Subscribe to PlayerState
-                _spotifyAppRemote.getPlayerApi()
-                        .subscribeToPlayerState()
-                        .setEventCallback(playerState -> {
-                            final com.spotify.protocol.types.Track track = playerState.track;
-                            if (track != null) {
-                                Log.d("SpotifyActivity", track.name + " by " + track.artist.name);
-                            }
-                        });
+        _currentSongIndex = index;
+        play(false);
+    }
+
+    @Override
+    public void onItemMoved(int oldIndex, int newIndex) {
+        if (_currentSongIndex == oldIndex) {
+            _currentSongIndex = newIndex;
+        }
     }
 
     @Override

@@ -6,12 +6,24 @@
     android:layout_height="match_parent"
     tools:context=".SpotifyActivity">
 
+    <TextView
+        android:id="@+id/empty_playlist_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add songs to your playlist by searching from the top right!"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        />
+
     <androidx.recyclerview.widget.RecyclerView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
         android:id="@+id/playlist_recycler_view"
-        >
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
     </androidx.recyclerview.widget.RecyclerView>
+
+    <include layout="@layout/player"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
