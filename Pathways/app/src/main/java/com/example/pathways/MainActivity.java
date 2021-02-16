@@ -3,20 +3,15 @@ package com.example.pathways;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.util.Pair;
-import androidx.lifecycle.Observer;
 
-import android.provider.BaseColumns;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,8 +32,7 @@ import android.widget.SearchView;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private boolean _isFabOpen = false;
-    FloatingActionButton _tripFab, _fab2, _fab3, _noteFab;
+    FloatingActionButton _tripFab;
     ArrayAdapter<String> _arrayAdapter;
     private AppDatabase _db;
     private TripDao _tripDao;
@@ -47,7 +41,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Executor _executor = Executors.newSingleThreadExecutor();
     private List<TripEntity> _tripList;
     private List<String> _tripNameList;
-    private boolean isFABOpen = false;
     private FirebaseAuth _auth;
 
     @Override
@@ -65,6 +58,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        _tripFab = findViewById(R.id.trip_fab);
+        _tripFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                createTripDialog(MainActivity.this);
+            }
+        });
 
         final String email = getIntent().getStringExtra("EMAIL");
         _executor.execute(new Runnable() {
@@ -106,46 +107,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     });
 
                 }
-            }
-        });
-
-        _tripFab = findViewById(R.id.trip_fab);
-        _tripFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                createTripDialog(MainActivity.this);
-            }
-        });
-        _fab2 = findViewById(R.id.fab2);
-        _fab2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, ImageViewActivity.class);
-                startActivity(intent);
-
-            }
-        });
-
-        _fab3 = findViewById(R.id.fab3);
-        _fab3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!_isFabOpen) {
-                    showFABMenu();
-                } else {
-                    closeFABMenu();
-                }
-            }
-        });
-
-        // Added temporarily to easily move to note Activity in debug
-        // TODO: remove button and navigation when proper application layout is set up
-        _noteFab = findViewById(R.id.noteButton);
-        _noteFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, NoteView.class);
-                startActivity(intent);
             }
         });
     }
@@ -212,21 +173,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .setNegativeButton("Cancel", null)
                 .create();
         dialog.show();
-    }
-
-    private void showFABMenu() {
-        _isFabOpen = true;
-        _tripFab.animate().translationY(-getResources().getDimension(R.dimen.standard_60));
-        _fab2.animate().translationY(-getResources().getDimension(R.dimen.standard_120));
-        _noteFab.animate().translationY(-getResources().getDimension(R.dimen.standard_180));
-    }
-
-    private void closeFABMenu() {
-        _isFabOpen = false;
-        _tripFab.animate().translationY(0);
-        _fab2.animate().translationY(0);
-        _noteFab.animate().translationY(0);
-
     }
 
 

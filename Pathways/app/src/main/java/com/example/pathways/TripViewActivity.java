@@ -1,10 +1,12 @@
 package com.example.pathways;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
 import com.google.android.gms.common.api.Status;
@@ -24,6 +26,7 @@ import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
 import com.google.maps.PendingResult;
@@ -62,6 +65,8 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
     private HashMap<Integer, Place> _tempPlaces = new HashMap<>();
     private TextView _startLocationTextView;
     private TextView _destinationTextView;
+    FloatingActionButton  _imageFab, _menuFab, _noteFab;
+    private boolean _isFabOpen = false;
 
     enum LocationType {
         START,
@@ -115,6 +120,37 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
             _geoApiContext =
                     new GeoApiContext.Builder().apiKey("AIzaSyDXx6nHhNO_jNJiFm0ZMp7KPOSK6USBBEg").build();
         }
+
+        _imageFab = findViewById(R.id.image_button);
+        _imageFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(TripViewActivity.this, ImageViewActivity.class);
+                startActivity(intent);
+
+            }
+        });
+
+        _menuFab = findViewById(R.id.menu_button);
+        _menuFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!_isFabOpen) {
+                    showFABMenu();
+                } else {
+                    closeFABMenu();
+                }
+            }
+        });
+
+        _noteFab = findViewById(R.id.note_button);
+        _noteFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(TripViewActivity.this, NoteView.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private void tripDependentInit() {
@@ -382,6 +418,19 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         _markerMap.get(placeId).remove();
         _markerMap.remove(placeId);
         createRoute();
+    }
+
+    private void showFABMenu() {
+        _isFabOpen = true;
+        _imageFab.animate().translationY(getResources().getDimension(R.dimen.standard_60));
+        _noteFab.animate().translationY(getResources().getDimension(R.dimen.standard_120));
+    }
+
+    private void closeFABMenu() {
+        _isFabOpen = false;
+        _imageFab.animate().translationY(0);
+        _noteFab.animate().translationY(0);
+
     }
 
     @Override
