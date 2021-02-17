@@ -178,7 +178,6 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
             }
 
             for (SongInfo info : _tripEntity.songInfos) {
-                Log.v("WTF", "????");
                 _songInfos.add(info);
                 runOnUiThread(() -> _playlistAdapter.notifyDataSetChanged());
             }
@@ -242,6 +241,7 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
 
                 SongInfo songInfo = new SongInfo(imageUrl, artist, albumName, trackName, spotifyUri);
                 _songInfos.add(songInfo);
+                Log.v("WTF", "Song added");
 
                 _playlistAdapter.notifyDataSetChanged();
 
@@ -283,7 +283,8 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
                             String trackJson = _gson.toJson(track);
 
 
-                            String[] tmp = {i + "", tracksPager.tracks.items.get(i).name, trackJson};
+                            String[] tmp = {i + "", tracksPager.tracks.items.get(i).name + " - " +
+                                    tracksPager.tracks.items.get(i).artists.get(0).name, trackJson};
                             cursor.addRow(tmp);
                         }
 
