@@ -46,5 +46,9 @@ dependencies {
     implementation 'org.slf4j:slf4j-simple:1.7.25'
     implementation group: 'com.github.seratch', name: 'java-time-backport', version: '1.0.0'
     implementation 'com.android.support:multidex:2.0.1'
-
+    implementation project(':spotify-app-remote-release-0.7.1')
+    implementation "com.google.code.gson:gson:2.8.6"
+    implementation 'com.spotify.android:auth:1.1.0'
+    implementation 'com.github.kaaes:spotify-web-api-android:0.4.1'
+    implementation 'com.squareup.picasso:picasso:2.71828'
 }

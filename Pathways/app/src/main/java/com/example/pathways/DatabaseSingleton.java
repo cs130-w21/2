@@ -10,7 +10,7 @@ public class DatabaseSingleton {
     public static AppDatabase getInstance(Context context) {
         if (db == null) {
             db = Room.databaseBuilder(context,
-                    AppDatabase.class, "database-name").build();
+                    AppDatabase.class, "database-name").fallbackToDestructiveMigration().build();
         }
         return db;
     }

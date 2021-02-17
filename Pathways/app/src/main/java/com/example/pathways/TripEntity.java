@@ -27,4 +27,8 @@ public class TripEntity implements Serializable {
     @TypeConverters(ListToStringConverter.class)
     @ColumnInfo(name = "image_urls")
     public List<String> imageUrls;
+
+    @TypeConverters(ListToStringConverter.class)
+    @ColumnInfo(name = "song_infos")
+    public List<SpotifyActivity.SongInfo> songInfos;
 }

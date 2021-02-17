@@ -30,6 +30,22 @@ public class ListToStringConverter {
     }
 
     @TypeConverter
+    public static List<SpotifyActivity.SongInfo> stringToSongInfoList(String data) {
+        if (data == null) {
+            return Collections.emptyList();
+        }
+
+        Type listType = new TypeToken<List<SpotifyActivity.SongInfo>>() {}.getType();
+
+        return _gson.fromJson(data, listType);
+    }
+
+    @TypeConverter
+    public static String SongInfoListToString(List<SpotifyActivity.SongInfo> someObjects) {
+        return _gson.toJson(someObjects);
+    }
+
+    @TypeConverter
     public static List<String> stringToStringList(String data) {
         if (data == null) {
             return Collections.emptyList();
