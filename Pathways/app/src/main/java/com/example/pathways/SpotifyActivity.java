@@ -37,7 +37,10 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
@@ -59,7 +62,7 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
     private SpotifyApi _webApi = new SpotifyApi();
     private SpotifyService _webSpotify;
     private Gson _gson = new Gson();
-    private ArrayList<SongInfo> _songInfos = new ArrayList<>();
+    private List<SongInfo> _songInfos = new ArrayList<>();
     private PlaylistAdapter _playlistAdapter;
     private ItemTouchHelper _touchHelper;
     private int _currentSongIndex = -1;
@@ -73,10 +76,13 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
     private ConstraintLayout _playerElements;
     private AppDatabase _db;
     private TripDao _tripDao;
+    private Executor _executor = Executors.newSingleThreadExecutor();
+    private TripEntity _tripEntity;
+    private TextView _emptyTextView;
 
     private boolean paused = true;
 
-    class SongInfo {
+    static class SongInfo {
         public String imageUrl;
         public String artist;
         public String albumName;
@@ -97,7 +103,6 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_spotify);
-        _db = DatabaseSingleton.getInstance(this);
 
         _playerElements = findViewById(R.id.player_elements);
         _playerElements.setVisibility(View.GONE);
@@ -137,6 +142,7 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
         _songTextView = findViewById(R.id.player_tack_name);
         _albumArt = findViewById(R.id.player_album_art);
 
+        _emptyTextView = findViewById(R.id.empty_playlist_text);
 
         RecyclerView playlist = findViewById(R.id.playlist_recycler_view);
 
@@ -153,7 +159,33 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
         _touchHelper.attachToRecyclerView(playlist);
 
         playlist.setAdapter(_playlistAdapter);
+
+        _db = DatabaseSingleton.getInstance(this);
+        _tripDao = _db.tripDao();
+
+        Long tripId = (Long) getIntent().getLongExtra("TRIP ID", 0);
+        _executor.execute(() -> {
+            _tripEntity = _tripDao.findByID(tripId);
+            tripDependentInit();
+        });
     }
+
+    private void tripDependentInit () {
+        getSupportActionBar().setTitle(_tripEntity.tripName + " Playlist");
+        if (_tripEntity.songInfos != null) {
+            if (_tripEntity.songInfos.size() > 0) {
+                _emptyTextView.setVisibility(View.GONE);
+            }
+
+            for (SongInfo info : _tripEntity.songInfos) {
+                Log.v("WTF", "????");
+                _songInfos.add(info);
+                runOnUiThread(() -> _playlistAdapter.notifyDataSetChanged());
+            }
+        }
+    }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -186,8 +218,7 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
             @Override
             public boolean onSuggestionClick(int i) {
                 if (_songInfos.size() == 0) {
-                    TextView empty = findViewById(R.id.empty_playlist_text);
-                    empty.setVisibility(View.GONE);
+                    _emptyTextView.setVisibility(View.GONE);
                 }
 
                 CursorAdapter c = searchView.getSuggestionsAdapter();
@@ -213,6 +244,13 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
                 _songInfos.add(songInfo);
 
                 _playlistAdapter.notifyDataSetChanged();
+
+                if (_tripEntity.songInfos == null) {
+                    _tripEntity.songInfos = new ArrayList<>();
+                }
+
+                _tripEntity.songInfos.add(songInfo);
+                _executor.execute(() -> _tripDao.updateTrips(_tripEntity));
 
                 return false;
             }
@@ -275,9 +313,8 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
             _currentSongIndex = 0;
         }
 
-        if (_songInfos.size() == 1) {
-            _playerElements.setVisibility(View.VISIBLE);
-        }
+        _playerElements.setVisibility(View.VISIBLE);
+
 
         if (resume) {
             _spotifyAppRemote.getPlayerApi().resume();
@@ -350,6 +387,7 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
                                     _spotifyAppRemote.getPlayerApi()
                                             .subscribeToPlayerState()
                                             .setEventCallback(playerState -> {
+
                                                 if (playerState.isPaused) {
                                                     _playPauseButton.setImageResource(R.drawable.ic_baseline_play_arrow_64);
                                                     paused = true;
@@ -399,10 +437,11 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
             }
         }
 
-
-
         _songInfos.remove(index);
         _playlistAdapter.notifyDataSetChanged();
+
+        _tripEntity.songInfos = _songInfos;
+        _executor.execute(() -> _tripDao.updateTrips(_tripEntity));
     }
 
     @Override
@@ -416,6 +455,9 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
         if (_currentSongIndex == oldIndex) {
             _currentSongIndex = newIndex;
         }
+
+        _tripEntity.songInfos = _songInfos;
+        _executor.execute(() -> _tripDao.updateTrips(_tripEntity));
     }
 
     @Override

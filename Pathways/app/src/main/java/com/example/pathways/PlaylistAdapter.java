@@ -21,11 +21,12 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import static java.util.Collections.*;
 
 public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHolder> implements ItemMoveCallback.ItemTouchHelperContract {
-    private ArrayList<SpotifyActivity.SongInfo> _songInfos;
+    private List<SpotifyActivity.SongInfo> _songInfos;
     private LayoutInflater _layoutInlater;
     private AdapterCallbacks _callbacks;
 
@@ -40,7 +41,7 @@ public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.ViewHo
     }
 
     public PlaylistAdapter(Context context,
-                                ArrayList<SpotifyActivity.SongInfo> songInfos, AdapterCallbacks adapterCallbacks){
+                           List<SpotifyActivity.SongInfo> songInfos, AdapterCallbacks adapterCallbacks){
         _layoutInlater = LayoutInflater.from(context);
         _songInfos = songInfos;
         _callbacks = adapterCallbacks;
