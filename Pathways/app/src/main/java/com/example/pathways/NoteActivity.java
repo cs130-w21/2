@@ -9,6 +9,8 @@ import com.google.android.material.snackbar.Snackbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
@@ -22,7 +24,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class NoteView extends AppCompatActivity {
+public class NoteActivity extends AppCompatActivity {
 
     FloatingActionButton addNoteButton;
 
@@ -92,8 +94,24 @@ public class NoteView extends AppCompatActivity {
         addNoteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                showDialog();
                 notesAdapter.add(new Note("added by user", "this note is added by the user"));
             }
         });
+    }
+
+    // Reference: https://developer.android.com/guide/topics/ui/dialogs#FullscreenDialog
+    public void showDialog() {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        CreateNoteFragment newFragment = new CreateNoteFragment();
+
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        // For a little polish, specify a transition animation
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        // To make it fullscreen, use the 'content' root view as the container
+        // for the fragment, which is always the root view for the activity
+        transaction.add(android.R.id.content, newFragment)
+                .addToBackStack(null).commit();
+
     }
 }

@@ -24,7 +24,7 @@
 
         <!-- Parent of NoteView may need to change -->
         <activity
-            android:name=".NoteView"
+            android:name=".NoteActivity"
             android:parentActivityName=".MainActivity"></activity>
         <activity
             android:name=".MainActivity"
