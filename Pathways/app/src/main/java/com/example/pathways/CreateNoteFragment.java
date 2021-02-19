@@ -1,8 +1,10 @@
 package com.example.pathways;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
@@ -10,8 +12,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.Button;
+import android.widget.EditText;
 
 public class CreateNoteFragment extends DialogFragment {
+    private Button createButton;
+    private Button cancelButton;
+
     @Override
     public void onStart() {
         super.onStart();
@@ -44,4 +51,31 @@ public class CreateNoteFragment extends DialogFragment {
         return dialog;
     }
 
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        createButton = getView().findViewById(R.id.create_note_button);
+        cancelButton = getView().findViewById(R.id.cancel_creation_button);
+
+        createButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                NoteActivity activity = ((NoteActivity) getActivity());
+
+                EditText titleEditText = getView().findViewById(R.id.note_title);
+                String titleText = titleEditText.getText().toString();
+
+                EditText noteEditText = getView().findViewById(R.id.note_input_text);
+                String inputText = noteEditText.getText().toString();
+                activity.addNote(new Note(titleText, inputText));
+                dismiss();
+            }
+        });
+
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dismiss();
+            }
+        });
+    }
 }

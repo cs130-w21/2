@@ -24,19 +24,44 @@
     </com.google.android.material.appbar.AppBarLayout>
     -->
 
-    <FrameLayout
+    <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background = "@color/quantum_white_100"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:background="@color/quantum_white_100"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:orientation="vertical">
 
         <EditText
+            android:id="@+id/note_title"
+            android:hint="Title"
             android:layout_width="fill_parent"
-            android:layout_height="500dp"
+            android:layout_height="wrap_content"
+            android:inputType="text" />
+        <EditText
+            android:id="@+id/note_input_text"
+            android:hint="Enter journal text here"
+            android:layout_width="fill_parent"
+            android:layout_height="400dp"
             android:inputType="textMultiLine"
             android:lines="12"
             android:scrollbars="vertical" />
+        <Button
+            android:id="@+id/create_note_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Create Note"
+            app:layout_anchor="@+id/frameLayout"
+            app:layout_anchorGravity="center" />
+        <Button
+            android:id="@+id/cancel_creation_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            app:layout_anchor="@+id/frameLayout"
+            app:layout_anchorGravity="center" />
+    </LinearLayout>
 
-    </FrameLayout>
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
