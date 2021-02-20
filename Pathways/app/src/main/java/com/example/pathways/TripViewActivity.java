@@ -37,7 +37,6 @@ import com.google.maps.model.LatLng;
 
 
 import androidx.fragment.app.FragmentActivity;
-import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -147,7 +146,7 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         _noteFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(TripViewActivity.this, NoteView.class);
+                Intent intent = new Intent(TripViewActivity.this, NoteActivity.class);
                 startActivity(intent);
             }
         });
