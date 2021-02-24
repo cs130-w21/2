@@ -50,9 +50,11 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/fab_margin_top"
         android:layout_marginRight="@dimen/fab_margin_right"
-        app:backgroundTint="#161414"
+        app:backgroundTint="@color/colorPrimary"
         android:layout_gravity="top|right|end"
-        app:srcCompat="@android:drawable/ic_menu_gallery" />
+        app:srcCompat="@drawable/ic_outline_image_24"
+        app:tint="@color/quantum_white_100"
+        />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/note_button"
@@ -60,8 +62,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/fab_margin_top"
         android:layout_marginRight="@dimen/fab_margin_right"
-        app:backgroundTint="#161414"
-        app:srcCompat="@android:drawable/ic_menu_edit"
+        app:backgroundTint="@color/colorPrimary"
+        app:srcCompat="@drawable/ic_outline_note_alt_24"
+        android:tint="@color/quantum_white_100"
         android:layout_gravity="top|right|end" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -70,9 +73,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/fab_margin_top"
         android:layout_marginRight="@dimen/fab_margin_right"
-        app:backgroundTint="#161414"
+        app:backgroundTint="@color/colorPrimary"
+        app:srcCompat="@drawable/ic_baseline_queue_music_24"
         android:tint="#ffffff"
-        android:src="@drawable/ic_baseline_queue_music_24"
         android:layout_gravity="top|right|end" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -81,8 +84,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/fab_margin_top"
         android:layout_marginRight="@dimen/fab_margin_right"
-        app:backgroundTint="#161414"
-        app:srcCompat="@android:drawable/ic_input_add"
+        app:backgroundTint="@color/colorPrimary"
+        app:srcCompat="@drawable/ic_baseline_keyboard_arrow_down_24"
+        android:tint="@color/quantum_white_100"
         android:layout_gravity="top|right|end" />
 
 
