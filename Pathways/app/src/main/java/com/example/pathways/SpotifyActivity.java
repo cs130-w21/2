@@ -37,8 +37,12 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -61,7 +65,7 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
     private static final int REQUEST_CODE = 1337;
     private SpotifyApi _webApi = new SpotifyApi();
     private SpotifyService _webSpotify;
-    private Gson _gson = new Gson();
+    private final Gson _gson = new Gson();
     private List<SongInfo> _songInfos = new ArrayList<>();
     private PlaylistAdapter _playlistAdapter;
     private ItemTouchHelper _touchHelper;
@@ -79,6 +83,10 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
     private Executor _executor = Executors.newSingleThreadExecutor();
     private TripEntity _tripEntity;
     private TextView _emptyTextView;
+
+    private long searchQueryTimeStamp;
+    final Timer queryTimer =  new Timer();
+    final static int SEARCH_DEBOUNCE_TIME = 200;
 
     private boolean paused = true;
 
@@ -266,43 +274,70 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                // Put your magic here
-                _webSpotify.searchTracks(newText, new Callback<TracksPager>() {
+                boolean res =  attemptSearch(newText, suggestionAdapter);
+
+                // If user no longer changes query text, still need to perform original query.
+                queryTimer.schedule(new TimerTask() {
                     @Override
-                    public void success(TracksPager tracksPager, Response response) {
-                        String[] columns = {
-                                BaseColumns._ID,
-                                SearchManager.SUGGEST_COLUMN_TEXT_1,
-                                SearchManager.SUGGEST_COLUMN_INTENT_DATA
-                        };
-
-                        MatrixCursor cursor = new MatrixCursor(columns);
-
-                        for (int i = 0; i < tracksPager.tracks.items.size(); i++) {
-                            Track track = tracksPager.tracks.items.get(i);
-                            String trackJson = _gson.toJson(track);
-
-
-                            String[] tmp = {i + "", tracksPager.tracks.items.get(i).name + " - " +
-                                    tracksPager.tracks.items.get(i).artists.get(0).name, trackJson};
-                            cursor.addRow(tmp);
-                        }
-
-                        suggestionAdapter.changeCursor(cursor);
-
+                    public void run() {
+                        Log.v("RUN", newText);
+                        attemptSearch(newText, suggestionAdapter);
                     }
+                }, SEARCH_DEBOUNCE_TIME + 1);
 
-                    @Override
-                    public void failure(RetrofitError error) {
-
-                    }
-                });
-
-                return false;
+                return res;
             }
         });
 
         return true;
+    }
+
+    private boolean attemptSearch(String newText, CursorAdapter suggestionAdapter) {
+        Log.v("Time", "Curr: " +  System.currentTimeMillis() + " Prev: " + searchQueryTimeStamp);
+        // Debounce query
+        if (System.currentTimeMillis() - searchQueryTimeStamp < SEARCH_DEBOUNCE_TIME) {
+            searchQueryTimeStamp = System.currentTimeMillis();
+            return false;
+        }
+
+        Log.v("ayo", "ayo");
+
+        searchQueryTimeStamp = System.currentTimeMillis();
+
+
+        // Put your magic here
+        _webSpotify.searchTracks(newText, new Callback<TracksPager>() {
+            @Override
+            public void success(TracksPager tracksPager, Response response) {
+                String[] columns = {
+                        BaseColumns._ID,
+                        SearchManager.SUGGEST_COLUMN_TEXT_1,
+                        SearchManager.SUGGEST_COLUMN_INTENT_DATA
+                };
+
+                MatrixCursor cursor = new MatrixCursor(columns);
+
+                for (int i = 0; i < tracksPager.tracks.items.size(); i++) {
+                    Track track = tracksPager.tracks.items.get(i);
+                    String trackJson = _gson.toJson(track);
+
+
+                    String[] tmp = {i + "", tracksPager.tracks.items.get(i).name + " - " +
+                            tracksPager.tracks.items.get(i).artists.get(0).name, trackJson};
+                    cursor.addRow(tmp);
+                }
+
+                suggestionAdapter.changeCursor(cursor);
+
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+
+            }
+        });
+
+        return false;
     }
 
     private void play(boolean resume) {
@@ -362,6 +397,7 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
         // Check if result comes from the correct activity
         if (requestCode == REQUEST_CODE) {
             AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
+            Log.d("token", response.getAccessToken());
 
             switch (response.getType()) {
                 // Response was successful and contains auth token
@@ -376,7 +412,7 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
                     ConnectionParams connectionParams =
                             new ConnectionParams.Builder(CLIENT_ID)
                                     .setRedirectUri(REDIRECT_URI)
-                                    .showAuthView(false)
+                                    .showAuthView(true)
                                     .build();
 
                     SpotifyAppRemote.connect(this, connectionParams,
@@ -411,6 +447,7 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
 
                 // Auth flow returned an error
                 case ERROR:
+                    Log.e("AUTHENTICATION FAILED", "YOU ARE A FAILURE");
                     // Handle error response
                     break;
 

@@ -8,7 +8,7 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_margin="15dp"
+        android:layout_margin="10dp"
         android:id="@+id/playlist_item_horizontal_layout"
         android:orientation="horizontal"
         >
@@ -17,8 +17,10 @@
             android:id="@+id/reorder_song_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:scaleX=".8"
+            android:scaleY=".8"
             android:src="@drawable/ic_baseline_reorder_36"
-            android:layout_marginRight="16dp"
+            android:layout_marginRight="12dp"
             android:layout_marginLeft="8dp"
             android:background="@android:color/white"
             android:layout_gravity="center_vertical"
@@ -26,8 +28,8 @@
 
         <ImageView
             android:id="@+id/album_art"
-            android:layout_width="84dp"
-            android:layout_height="84dp"
+            android:layout_width="62dp"
+            android:layout_height="62dp"
             android:maxWidth="64dp"
             android:gravity="start"
             android:layout_marginRight="16dp"
@@ -39,7 +41,9 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_gravity="center_vertical"
+            >
 
 
             <LinearLayout
@@ -49,11 +53,11 @@
 
                 <TextView
                     android:id="@+id/text_view_tack_name"
-                    android:layout_width="300dp"
+                    android:layout_width="170dp"
                     android:layout_height="wrap_content"
                     android:text="Name"
                     android:textAlignment="textStart"
-                    android:textSize="18sp"
+                    android:textSize="15sp"
                     android:textStyle="bold"
                     android:gravity="start"
                     android:maxLines="1"
@@ -68,8 +72,8 @@
                 android:layout_height="wrap_content"
                 android:text="Address"
                 android:textAlignment="textStart"
-                android:textSize="16sp"
-                android:maxWidth="305dp"
+                android:textSize="12sp"
+                android:maxWidth="120dp"
                 android:gravity="start" />
 
             <TextView
@@ -78,7 +82,8 @@
                 android:layout_height="wrap_content"
                 android:text="Rating"
                 android:textAlignment="textStart"
-                android:textSize="16sp"
+                android:textSize="12sp"
+                android:maxWidth="120dp"
                 android:gravity="start" />
 
         </LinearLayout>
@@ -90,6 +95,8 @@
         android:id="@+id/delete_song_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:scaleX=".8"
+        android:scaleY=".8"
         android:src="@drawable/ic_baseline_remove_circle_outline_36"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
