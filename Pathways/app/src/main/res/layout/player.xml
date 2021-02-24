@@ -100,7 +100,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/ic_baseline_skip_previous_64"
             android:scaleX=".65"
-            android:scaleY=".8"
+            android:scaleY=".65"
             android:background="@color/colorPrimary"
             />
 
@@ -112,8 +112,8 @@
             android:scaleY=".8"
             android:src="@drawable/ic_baseline_play_arrow_64"
             android:background="@color/colorPrimary"
-            android:layout_marginLeft="-14dp"
-            android:layout_marginRight="-14dp"
+            android:layout_marginLeft="-8dp"
+            android:layout_marginRight="-8dp"
 
             />
 

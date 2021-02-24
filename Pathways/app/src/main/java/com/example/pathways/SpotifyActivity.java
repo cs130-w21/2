@@ -18,9 +18,11 @@ import android.database.MatrixCursor;
 import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -83,6 +85,8 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
     private Executor _executor = Executors.newSingleThreadExecutor();
     private TripEntity _tripEntity;
     private TextView _emptyTextView;
+    RecyclerView _playlistRecyclerView;
+    private View _playerSpacer;
 
     private long searchQueryTimeStamp;
     final Timer queryTimer =  new Timer();
@@ -114,6 +118,9 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
 
         _playerElements = findViewById(R.id.player_elements);
         _playerElements.setVisibility(View.GONE);
+
+        _playerSpacer = findViewById(R.id.spacer);
+        _playerSpacer.setVisibility(View.GONE);
 
         _playPauseButton = findViewById(R.id.play_button);
         _playPauseButton.setOnClickListener((View view) -> {
@@ -152,21 +159,22 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
 
         _emptyTextView = findViewById(R.id.empty_playlist_text);
 
-        RecyclerView playlist = findViewById(R.id.playlist_recycler_view);
+        _playlistRecyclerView = findViewById(R.id.playlist_recycler_view);
+
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        playlist.setLayoutManager(layoutManager);
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(playlist.getContext(),
+        _playlistRecyclerView.setLayoutManager(layoutManager);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(_playlistRecyclerView.getContext(),
                 layoutManager.getOrientation());
-        playlist.addItemDecoration(dividerItemDecoration);
+        _playlistRecyclerView.addItemDecoration(dividerItemDecoration);
 
         _playlistAdapter = new PlaylistAdapter(this, _songInfos, this);
         ItemTouchHelper.Callback callback =
                 new ItemMoveCallback(_playlistAdapter);
         _touchHelper = new ItemTouchHelper(callback);
-        _touchHelper.attachToRecyclerView(playlist);
+        _touchHelper.attachToRecyclerView(_playlistRecyclerView);
 
-        playlist.setAdapter(_playlistAdapter);
+        _playlistRecyclerView.setAdapter(_playlistAdapter);
 
         _db = DatabaseSingleton.getInstance(this);
         _tripDao = _db.tripDao();
@@ -230,7 +238,14 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
 
                 CursorAdapter c = searchView.getSuggestionsAdapter();
                 Cursor cur = c.getCursor();
-                cur.move(i);
+
+                while (!(cur.getString(
+                        cur.getColumnIndex(BaseColumns._ID))).equals(i + "")) {
+                    cur.move(1);
+                }
+
+                Log.v("CURR", i + " " + cur.getString(
+                        cur.getColumnIndex(BaseColumns._ID)));
 
                 Track track = _gson.fromJson(cur.getString(
                         cur.getColumnIndex(SearchManager.SUGGEST_COLUMN_INTENT_DATA)), Track.class);
@@ -293,14 +308,11 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
     }
 
     private boolean attemptSearch(String newText, CursorAdapter suggestionAdapter) {
-        Log.v("Time", "Curr: " +  System.currentTimeMillis() + " Prev: " + searchQueryTimeStamp);
         // Debounce query
         if (System.currentTimeMillis() - searchQueryTimeStamp < SEARCH_DEBOUNCE_TIME) {
             searchQueryTimeStamp = System.currentTimeMillis();
             return false;
         }
-
-        Log.v("ayo", "ayo");
 
         searchQueryTimeStamp = System.currentTimeMillis();
 
@@ -324,6 +336,7 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
 
                     String[] tmp = {i + "", tracksPager.tracks.items.get(i).name + " - " +
                             tracksPager.tracks.items.get(i).artists.get(0).name, trackJson};
+                    Log.v("MC", i + " " + tmp[1]);
                     cursor.addRow(tmp);
                 }
 
@@ -350,6 +363,8 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
         }
 
         _playerElements.setVisibility(View.VISIBLE);
+        _playerSpacer.setVisibility(View.VISIBLE);
+
 
 
         if (resume) {
@@ -468,9 +483,15 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
                 if (index == 0) {
                     pause();
                     _playerElements.setVisibility(View.GONE);
-
+                    _playerSpacer.setVisibility(View.GONE);
                 } else {
                     play(false);
+                    queryTimer.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            pause();
+                        }
+                    }, 10);
                 }
             }
         }
