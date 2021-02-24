@@ -18,9 +18,11 @@ import android.database.MatrixCursor;
 import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -37,8 +39,12 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -61,7 +67,7 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
     private static final int REQUEST_CODE = 1337;
     private SpotifyApi _webApi = new SpotifyApi();
     private SpotifyService _webSpotify;
-    private Gson _gson = new Gson();
+    private final Gson _gson = new Gson();
     private List<SongInfo> _songInfos = new ArrayList<>();
     private PlaylistAdapter _playlistAdapter;
     private ItemTouchHelper _touchHelper;
@@ -79,6 +85,12 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
     private Executor _executor = Executors.newSingleThreadExecutor();
     private TripEntity _tripEntity;
     private TextView _emptyTextView;
+    RecyclerView _playlistRecyclerView;
+    private View _playerSpacer;
+
+    private long searchQueryTimeStamp;
+    final Timer queryTimer =  new Timer();
+    final static int SEARCH_DEBOUNCE_TIME = 200;
 
     private boolean paused = true;
 
@@ -106,6 +118,9 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
 
         _playerElements = findViewById(R.id.player_elements);
         _playerElements.setVisibility(View.GONE);
+
+        _playerSpacer = findViewById(R.id.spacer);
+        _playerSpacer.setVisibility(View.GONE);
 
         _playPauseButton = findViewById(R.id.play_button);
         _playPauseButton.setOnClickListener((View view) -> {
@@ -144,21 +159,22 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
 
         _emptyTextView = findViewById(R.id.empty_playlist_text);
 
-        RecyclerView playlist = findViewById(R.id.playlist_recycler_view);
+        _playlistRecyclerView = findViewById(R.id.playlist_recycler_view);
+
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        playlist.setLayoutManager(layoutManager);
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(playlist.getContext(),
+        _playlistRecyclerView.setLayoutManager(layoutManager);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(_playlistRecyclerView.getContext(),
                 layoutManager.getOrientation());
-        playlist.addItemDecoration(dividerItemDecoration);
+        _playlistRecyclerView.addItemDecoration(dividerItemDecoration);
 
         _playlistAdapter = new PlaylistAdapter(this, _songInfos, this);
         ItemTouchHelper.Callback callback =
                 new ItemMoveCallback(_playlistAdapter);
         _touchHelper = new ItemTouchHelper(callback);
-        _touchHelper.attachToRecyclerView(playlist);
+        _touchHelper.attachToRecyclerView(_playlistRecyclerView);
 
-        playlist.setAdapter(_playlistAdapter);
+        _playlistRecyclerView.setAdapter(_playlistAdapter);
 
         _db = DatabaseSingleton.getInstance(this);
         _tripDao = _db.tripDao();
@@ -222,7 +238,14 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
 
                 CursorAdapter c = searchView.getSuggestionsAdapter();
                 Cursor cur = c.getCursor();
-                cur.move(i);
+
+                while (!(cur.getString(
+                        cur.getColumnIndex(BaseColumns._ID))).equals(i + "")) {
+                    cur.move(1);
+                }
+
+                Log.v("CURR", i + " " + cur.getString(
+                        cur.getColumnIndex(BaseColumns._ID)));
 
                 Track track = _gson.fromJson(cur.getString(
                         cur.getColumnIndex(SearchManager.SUGGEST_COLUMN_INTENT_DATA)), Track.class);
@@ -266,43 +289,68 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                // Put your magic here
-                _webSpotify.searchTracks(newText, new Callback<TracksPager>() {
+                boolean res =  attemptSearch(newText, suggestionAdapter);
+
+                // If user no longer changes query text, still need to perform original query.
+                queryTimer.schedule(new TimerTask() {
                     @Override
-                    public void success(TracksPager tracksPager, Response response) {
-                        String[] columns = {
-                                BaseColumns._ID,
-                                SearchManager.SUGGEST_COLUMN_TEXT_1,
-                                SearchManager.SUGGEST_COLUMN_INTENT_DATA
-                        };
-
-                        MatrixCursor cursor = new MatrixCursor(columns);
-
-                        for (int i = 0; i < tracksPager.tracks.items.size(); i++) {
-                            Track track = tracksPager.tracks.items.get(i);
-                            String trackJson = _gson.toJson(track);
-
-
-                            String[] tmp = {i + "", tracksPager.tracks.items.get(i).name + " - " +
-                                    tracksPager.tracks.items.get(i).artists.get(0).name, trackJson};
-                            cursor.addRow(tmp);
-                        }
-
-                        suggestionAdapter.changeCursor(cursor);
-
+                    public void run() {
+                        Log.v("RUN", newText);
+                        attemptSearch(newText, suggestionAdapter);
                     }
+                }, SEARCH_DEBOUNCE_TIME + 1);
 
-                    @Override
-                    public void failure(RetrofitError error) {
-
-                    }
-                });
-
-                return false;
+                return res;
             }
         });
 
         return true;
+    }
+
+    private boolean attemptSearch(String newText, CursorAdapter suggestionAdapter) {
+        // Debounce query
+        if (System.currentTimeMillis() - searchQueryTimeStamp < SEARCH_DEBOUNCE_TIME) {
+            searchQueryTimeStamp = System.currentTimeMillis();
+            return false;
+        }
+
+        searchQueryTimeStamp = System.currentTimeMillis();
+
+
+        // Put your magic here
+        _webSpotify.searchTracks(newText, new Callback<TracksPager>() {
+            @Override
+            public void success(TracksPager tracksPager, Response response) {
+                String[] columns = {
+                        BaseColumns._ID,
+                        SearchManager.SUGGEST_COLUMN_TEXT_1,
+                        SearchManager.SUGGEST_COLUMN_INTENT_DATA
+                };
+
+                MatrixCursor cursor = new MatrixCursor(columns);
+
+                for (int i = 0; i < tracksPager.tracks.items.size(); i++) {
+                    Track track = tracksPager.tracks.items.get(i);
+                    String trackJson = _gson.toJson(track);
+
+
+                    String[] tmp = {i + "", tracksPager.tracks.items.get(i).name + " - " +
+                            tracksPager.tracks.items.get(i).artists.get(0).name, trackJson};
+                    Log.v("MC", i + " " + tmp[1]);
+                    cursor.addRow(tmp);
+                }
+
+                suggestionAdapter.changeCursor(cursor);
+
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+
+            }
+        });
+
+        return false;
     }
 
     private void play(boolean resume) {
@@ -315,6 +363,8 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
         }
 
         _playerElements.setVisibility(View.VISIBLE);
+        _playerSpacer.setVisibility(View.VISIBLE);
+
 
 
         if (resume) {
@@ -362,6 +412,7 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
         // Check if result comes from the correct activity
         if (requestCode == REQUEST_CODE) {
             AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
+            Log.d("token", response.getAccessToken());
 
             switch (response.getType()) {
                 // Response was successful and contains auth token
@@ -376,7 +427,7 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
                     ConnectionParams connectionParams =
                             new ConnectionParams.Builder(CLIENT_ID)
                                     .setRedirectUri(REDIRECT_URI)
-                                    .showAuthView(false)
+                                    .showAuthView(true)
                                     .build();
 
                     SpotifyAppRemote.connect(this, connectionParams,
@@ -411,6 +462,7 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
 
                 // Auth flow returned an error
                 case ERROR:
+                    Log.e("AUTHENTICATION FAILED", "YOU ARE A FAILURE");
                     // Handle error response
                     break;
 
@@ -431,9 +483,15 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
                 if (index == 0) {
                     pause();
                     _playerElements.setVisibility(View.GONE);
-
+                    _playerSpacer.setVisibility(View.GONE);
                 } else {
                     play(false);
+                    queryTimer.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            pause();
+                        }
+                    }, 10);
                 }
             }
         }
