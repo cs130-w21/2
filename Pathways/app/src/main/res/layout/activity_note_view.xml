@@ -22,8 +22,11 @@
       android:layout_marginEnd="16dp"
       android:layout_marginRight="16dp"
       android:layout_marginBottom="16dp"
-      app:backgroundTint="#161414"
+      app:backgroundTint="@color/colorPrimary"
       app:layout_constraintBottom_toBottomOf="@+id/noteListView"
       app:layout_constraintEnd_toEndOf="@+id/noteListView"
-      app:srcCompat="@android:drawable/ic_input_add" />
+      app:srcCompat="@drawable/ic_add_24"
+      android:tint="@color/quantum_white_100"
+      />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

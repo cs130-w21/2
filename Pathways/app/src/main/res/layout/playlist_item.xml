@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent" android:layout_height="wrap_content"
     android:id="@+id/layout_playlist_item"
     android:background="@color/quantum_white_100"
@@ -13,20 +14,20 @@
         android:orientation="horizontal"
         >
 
-        <ImageButton
+        <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/reorder_song_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:scaleX=".8"
             android:scaleY=".8"
-            android:src="@drawable/ic_baseline_reorder_36"
+            app:srcCompat="@drawable/ic_baseline_reorder_36"
             android:layout_marginRight="12dp"
             android:layout_marginLeft="8dp"
             android:background="@android:color/white"
             android:layout_gravity="center_vertical"
             />
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/album_art"
             android:layout_width="62dp"
             android:layout_height="62dp"
@@ -91,16 +92,16 @@
 
     </LinearLayout>
 
-    <ImageButton
+    <androidx.appcompat.widget.AppCompatImageButton
         android:id="@+id/delete_song_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:scaleX=".8"
         android:scaleY=".8"
-        android:src="@drawable/ic_baseline_remove_circle_outline_36"
+        app:srcCompat="@drawable/ic_baseline_remove_circle_outline_36"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:layout_marginRight="24dp"
+        android:layout_marginRight="18dp"
         android:background="@android:color/white"
         />
 

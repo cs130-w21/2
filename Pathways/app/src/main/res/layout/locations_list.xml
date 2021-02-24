@@ -6,13 +6,13 @@
     android:layout_height="500dp"
     android:background="@android:color/white"
     android:orientation="vertical"
-    app:behavior_peekHeight="84dp"
+    app:behavior_peekHeight="76dp"
     android:elevation="16dp"
     app:layout_behavior="@string/bottom_sheet_behavior">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="84dp"
+        android:layout_height="76dp"
         android:background="@color/colorPrimaryDark"
         android:paddingTop="5.5dp"
         android:paddingStart="8dp"

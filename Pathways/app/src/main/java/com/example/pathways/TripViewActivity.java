@@ -36,6 +36,7 @@ import com.google.maps.model.DirectionsRoute;
 import com.google.maps.model.LatLng;
 
 
+import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -136,8 +137,11 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
             public void onClick(View view) {
                 if (!_isFabOpen) {
                     showFABMenu();
+                    _menuFab.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_baseline_keyboard_arrow_up_24, null));
+
                 } else {
                     closeFABMenu();
+                    _menuFab.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.ic_baseline_keyboard_arrow_down_24, null));
                 }
             }
         });
