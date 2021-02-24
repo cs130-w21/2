@@ -3,6 +3,8 @@ package com.example.pathways;
 import java.util.Date;
 
 public class Note {
+    public Trip trip;
+    public Location location;
     public String title;
     public String text;
     public Date created;
