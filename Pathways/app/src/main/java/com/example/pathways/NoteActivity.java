@@ -15,6 +15,8 @@ import java.util.ArrayList;
 public class NoteActivity extends AppCompatActivity {
     NotesAdapter notesAdapter;
     FloatingActionButton addNoteButton;
+    private Long tripId;
+    private Long locationId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +30,11 @@ public class NoteActivity extends AppCompatActivity {
 
         notesAdapter = new NotesAdapter(this, notes);
         listView.setAdapter(notesAdapter);
+
+        tripId = (Long) getIntent().getLongExtra("TRIP ID", 0);
+        //locationId = (Long) getIntent().getLongExtra("LOC ID", 0);
+
+        //addNote(new Note(tripId.toString(), tripId.toString()));
 
         addNoteButton = findViewById(R.id.addNoteButton);
         addNoteButton.setOnClickListener(new View.OnClickListener() {
