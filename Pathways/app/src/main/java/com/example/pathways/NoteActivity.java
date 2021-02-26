@@ -20,6 +20,7 @@ public class NoteActivity extends AppCompatActivity {
     FloatingActionButton addNoteButton;
     private Long tripId;
     private Long locationId;
+
     private AppDatabase _db;
     private NoteDao _noteDao;
     private TripDao _tripDao;
@@ -41,6 +42,11 @@ public class NoteActivity extends AppCompatActivity {
 
         tripId = (Long) getIntent().getLongExtra("TRIP ID", 0);
         //locationId = (Long) getIntent().getLongExtra("LOC ID", 0);
+        //addNote(new Note(tripId.toString(), tripId.toString()));
+
+        tripId = (Long) getIntent().getLongExtra("TRIP ID", 0);
+        //locationId = (Long) getIntent().getLongExtra("LOC ID", 0);
+
         //addNote(new Note(tripId.toString(), tripId.toString()));
 
         addNoteButton = findViewById(R.id.addNoteButton);

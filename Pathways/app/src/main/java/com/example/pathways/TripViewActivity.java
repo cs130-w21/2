@@ -153,6 +153,7 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
                 Intent intent = new Intent(TripViewActivity.this, NoteActivity.class);
                 intent.putExtra("TRIP ID", tripId);
                 //intent.putExtra("PLACE IDS", _tripEntity.placeIds);   //LATER
+
                 startActivity(intent);
             }
         });
