@@ -126,6 +126,7 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(TripViewActivity.this, ImageViewActivity.class);
+                intent.putExtra("TRIP ID", _tripEntity.tripid);
                 startActivity(intent);
 
             }
@@ -354,7 +355,7 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
 
     private void generateTripFromTripEntity() {
         _trip = new Trip(_tripEntity.tripName);
-        _trip.setImages(_tripEntity.imageUrls);
+        _trip.setImages(_tripEntity.imageBitmaps,_tripEntity.imageText);
         _trip.setNoteIds(_tripEntity.noteIds);
 
         if (_tripEntity.placeIds == null) {

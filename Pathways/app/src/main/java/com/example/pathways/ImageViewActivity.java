@@ -1,18 +1,45 @@
 package com.example.pathways;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.content.Context;
+
+
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+
+import java.util.List;
+import java.util.ArrayList;
 import java.io.FileNotFoundException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class ImageViewActivity extends AppCompatActivity {
-    ImageView targetImage;
+    List<ImageView> targetImages = new ArrayList<>();
+    List<String> ImageTexts = new ArrayList<>();
+    ImageView i0;
+    String ImageText;
+    int numImages = 0;
+    //int maxImages = 6;
+    private AppDatabase _db;
+    private TripDao _tripDao;
+    private Executor _executor = Executors.newSingleThreadExecutor();
+    private ImageListAdapter _imagesListAdapter;
+    private Trip _trip;
+    // Database entity
+    private TripEntity _tripEntity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -20,15 +47,79 @@ public class ImageViewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_image_view);
 
         Button buttonLoadImage = (Button)findViewById(R.id.loadimage);
-        targetImage = (ImageView)findViewById(R.id.targetimage);
+        //i0 = (ImageView) findViewById(R.id.targetimage0);
+
+        _db = DatabaseSingleton.getInstance(this);
+        _tripDao = _db.tripDao();
+
+        RecyclerView imagesList = findViewById(R.id.images_list_recycler_view);
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        imagesList.setLayoutManager(layoutManager);
+
+        Long tripId = (Long) getIntent().getLongExtra("TRIP ID", 0);
+        Log.v("ID", tripId + "");
+        _executor.execute(() -> {
+            TripEntity tripEntity = _tripDao.findByID(tripId);
+            _tripEntity = tripEntity;
+            Log.v("NAME", tripEntity.tripName);
+            _trip = new Trip(_tripEntity.tripName);
+            List<Bitmap> savedImages = _tripEntity.imageBitmaps;
+            List<String> ImageTexts = _tripEntity.imageText;
+
+            if (savedImages == null)
+            {
+                _imagesListAdapter = new ImageListAdapter(this, _trip.getImages(), _trip.getImageNames());
+            }
+            else {
+                _trip.setImages(savedImages, ImageTexts);
+                int numSavedImages = _trip.getNumImages();
+                Log.v("NUM_SAVED_IMAGES", numSavedImages + "");
+
+                _imagesListAdapter = new ImageListAdapter(this, savedImages, ImageTexts);
+            }
+            imagesList.setAdapter(_imagesListAdapter);
+        });
+
+
+        /*for(int i = 0; i < maxImages; i++)
+        {
+            String name = "targetimage" + i;
+            int id = getResources().getIdentifier(name, "id", getApplicationContext().getPackageName());
+            if(id != 0) {
+                i0 = (ImageView) findViewById(id);
+                targetImages.add(i0);
+            }
+        }
+        i0 = (ImageView)findViewById(R.id.targetimage0);
+        targetImages.add(i0);
+        i1 = (ImageView)findViewById(R.id.targetimage1);
+        targetImages.add(i1);
+        i2 = (ImageView)findViewById(R.id.targetimage2);
+        targetImages.add(i2);*/
 
         buttonLoadImage.setOnClickListener(new Button.OnClickListener(){
-
             @Override
             public void onClick(View arg0) {
-                Intent intent = new Intent(Intent.ACTION_PICK,
-                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(intent, 0);
+                Context c = ImageViewActivity.this;
+                EditText taskEditText = new EditText(c);
+                AlertDialog dialog = new AlertDialog.Builder(c)
+                        .setTitle("Location")
+                        .setMessage(" ")
+                        .setView(taskEditText)
+                        .setPositiveButton("Add", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                ImageText = String.valueOf(taskEditText.getText());
+                                Intent intent = new Intent(Intent.ACTION_PICK,
+                                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                                startActivityForResult(intent, 0);
+
+                            }
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .create();
+                dialog.show();
             }});
     }
 
@@ -38,13 +129,51 @@ public class ImageViewActivity extends AppCompatActivity {
 
         if (resultCode == RESULT_OK) {
             Uri targetUri = data.getData();
-            Bitmap bitmap;
-            try {
-                bitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(targetUri));
-                targetImage.setImageBitmap(bitmap);
-            } catch (FileNotFoundException e) {
+            try{
+                BitmapFactory.Options dbo = new BitmapFactory.Options();
+                dbo.inSampleSize = 6;
+
+                Bitmap bitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(targetUri), null, dbo);
+                _trip.addImage(bitmap, ImageText);
+                _tripEntity.imageBitmaps = _trip.getImages();
+                _tripEntity.imageText = _trip.getImageNames();
+
+                _executor.execute(() -> _tripDao.updateTrips(_tripEntity));
+
+                _imagesListAdapter.notifyDataSetChanged();
+            }
+            catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
+
+
+            //BitmapFactory.Options dbo = new BitmapFactory.Options();
+                //dbo.inSampleSize = 6;
+
+                //bitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(targetUri), null, dbo);
+                //i0.setImageBitmap(bitmap);
+
+
+
+                /*if(numImages < maxImages) {
+                    targetImages.get(numImages).setImageBitmap(bitmap);
+                    numImages++;
+                    /*curr.setImageBitmap(bitmap);
+                    if(curr == i0)
+                    {
+                        curr = i1;
+                    }
+                    else if(curr == i1)
+                    {
+                        curr = i2;
+                    }
+                    else
+                    {
+                        numImages = maxImages;
+                    }
+
+                }*/
+
         }
     }
 }

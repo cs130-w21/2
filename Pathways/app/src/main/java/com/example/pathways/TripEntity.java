@@ -1,5 +1,7 @@
 package com.example.pathways;
 
+import android.graphics.Bitmap;
+
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
@@ -7,6 +9,7 @@ import androidx.room.TypeConverters;
 
 import java.io.Serializable;
 import java.util.List;
+
 
 @Entity
 public class TripEntity implements Serializable {
@@ -25,8 +28,12 @@ public class TripEntity implements Serializable {
     public List<Long> noteIds;
 
     @TypeConverters(ListToStringConverter.class)
-    @ColumnInfo(name = "image_urls")
-    public List<String> imageUrls;
+    @ColumnInfo(name = "image_bitmaps")
+    public List<Bitmap> imageBitmaps;
+
+    @TypeConverters(ListToStringConverter.class)
+    @ColumnInfo(name = "image_text")
+    public List<String> imageText;
 
     @TypeConverters(ListToStringConverter.class)
     @ColumnInfo(name = "song_infos")
