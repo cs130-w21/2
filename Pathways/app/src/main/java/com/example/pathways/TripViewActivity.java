@@ -152,8 +152,6 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
             public void onClick(View view) {
                 Intent intent = new Intent(TripViewActivity.this, NoteActivity.class);
                 intent.putExtra("TRIP ID", tripId);
-                //intent.putExtra("PLACE IDS", _tripEntity.placeIds);   //LATER
-
                 startActivity(intent);
             }
         });
@@ -457,5 +455,18 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         _bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
         _map.moveCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 5));
+    }
+
+    @Override
+    public void addNoteForLocation(String placeId, String locationName) {
+        Intent intent = new Intent(TripViewActivity.this, NoteActivity.class);
+        intent.putExtra("PLACE ID AND NAME", new String[]{placeId, locationName});
+        intent.putExtra("TRIP ID", _tripEntity.tripid);
+        startActivity(intent);
+    }
+
+    @Override
+    public void addImageForLocation(String placeId, String locationName) {
+
     }
 }
