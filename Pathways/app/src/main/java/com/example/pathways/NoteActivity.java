@@ -100,6 +100,18 @@ public class NoteActivity extends AppCompatActivity {
         transaction.add(android.R.id.content, newFragment)
                 .addToBackStack(null).commit();
     }
+    public void showEditDialog(Note note) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        EditNoteFragment newFragment = new EditNoteFragment(note);
+
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        // For a little polish, specify a transition animation
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        // To make it fullscreen, use the 'content' root view as the container
+        // for the fragment, which is always the root view for the activity
+        transaction.add(android.R.id.content, newFragment)
+                .addToBackStack(null).commit();
+    }
 
     public void addNote(Note note)
     {
@@ -133,6 +145,5 @@ public class NoteActivity extends AppCompatActivity {
             notesAdapter.add(note);
             Log.v("noteAct", note.title);
         }
-
     }
 }

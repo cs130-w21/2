@@ -72,6 +72,14 @@ public class ReadNoteFragment extends DialogFragment {
         date.setText(note.created);
         content.setText(note.text);
 
+        editButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                NoteActivity noteActivity = (NoteActivity) getActivity();
+                noteActivity.showEditDialog(note);
+            }
+        });
+
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
