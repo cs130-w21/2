@@ -46,6 +46,21 @@ public class ListToStringConverter {
     }
 
     @TypeConverter
+    public static Location stringToLocation(String data) {
+        if (data == null) {
+            return new Location();
+        }
+
+
+        return _gson.fromJson(data, Location.class);
+    }
+
+    @TypeConverter
+    public static String LocationToString(Location someObjects) {
+        return _gson.toJson(someObjects);
+    }
+
+    @TypeConverter
     public static List<String> stringToStringList(String data) {
         if (data == null) {
             return Collections.emptyList();

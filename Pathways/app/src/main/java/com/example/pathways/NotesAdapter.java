@@ -28,10 +28,7 @@ public class NotesAdapter extends ArrayAdapter<Note> {
         TextView noteDate = (TextView) convertView.findViewById(R.id.noteDate);
         TextView noteText = (TextView) convertView.findViewById(R.id.noteText);
 
-        // Populate the data into the template view using the data object
-        String pattern = "MM/dd/yyyy";
-        SimpleDateFormat df = new SimpleDateFormat(pattern);
-        String dateStr = df.format(note.created);
+        String dateStr = note.created;
 
         String textStr = note.text;
         if (note.text.length() > 20) {
