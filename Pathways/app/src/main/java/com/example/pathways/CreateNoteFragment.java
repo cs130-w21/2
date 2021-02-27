@@ -19,6 +19,7 @@ public class CreateNoteFragment extends DialogFragment {
     private Button createButton;
     private Button cancelButton;
 
+
     @Override
     public void onStart() {
         super.onStart();
@@ -39,6 +40,7 @@ public class CreateNoteFragment extends DialogFragment {
         return inflater.inflate(R.layout.fragment_create_note, container, false);
     }
 
+
     /** The system calls this only when creating the layout in a dialog. */
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -55,7 +57,6 @@ public class CreateNoteFragment extends DialogFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         createButton = getView().findViewById(R.id.create_note_button);
         cancelButton = getView().findViewById(R.id.cancel_creation_button);
-
         createButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -71,11 +72,13 @@ public class CreateNoteFragment extends DialogFragment {
             }
         });
 
+
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 dismiss();
             }
         });
+
     }
 }
