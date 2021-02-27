@@ -4,12 +4,14 @@ import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import androidx.annotation.RequiresPermission;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
@@ -39,21 +41,25 @@ public class NoteActivity extends AppCompatActivity {
         _tripDao = _db.tripDao();
 
         ListView listView = findViewById(R.id.noteListView);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view,
+                                    final int position, long id) {
+                Note clicked = (Note) listView.getItemAtPosition(position);
+                showReadDialog(clicked);
+            }
+        });
 
         tripId = (Long) getIntent().getLongExtra("TRIP ID", 0);
         //locationId = (Long) getIntent().getLongExtra("LOC ID", 0);
-        //addNote(new Note(tripId.toString(), tripId.toString()));
-
-        tripId = (Long) getIntent().getLongExtra("TRIP ID", 0);
-        //locationId = (Long) getIntent().getLongExtra("LOC ID", 0);
-
         //addNote(new Note(tripId.toString(), tripId.toString()));
 
         addNoteButton = findViewById(R.id.addNoteButton);
         addNoteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showDialog();
+                showCreateDialog();
             }
         });
         Long tripId = (Long) getIntent().getLongExtra("TRIP ID", 0);
@@ -69,7 +75,7 @@ public class NoteActivity extends AppCompatActivity {
     }
 
     // Reference: https://developer.android.com/guide/topics/ui/dialogs#FullscreenDialog
-    public void showDialog() {
+    public void showCreateDialog() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         CreateNoteFragment newFragment = new CreateNoteFragment();
 
@@ -81,6 +87,18 @@ public class NoteActivity extends AppCompatActivity {
         transaction.add(android.R.id.content, newFragment)
                 .addToBackStack(null).commit();
 
+    }
+    public void showReadDialog(Note note) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        ReadNoteFragment newFragment = new ReadNoteFragment(note);
+
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        // For a little polish, specify a transition animation
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        // To make it fullscreen, use the 'content' root view as the container
+        // for the fragment, which is always the root view for the activity
+        transaction.add(android.R.id.content, newFragment)
+                .addToBackStack(null).commit();
     }
 
     public void addNote(Note note)
