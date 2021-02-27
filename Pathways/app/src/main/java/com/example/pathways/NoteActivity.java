@@ -135,7 +135,7 @@ public class NoteActivity extends AppCompatActivity {
     }
     public void deleteNote(Note note)
     {
-        notesAdapter.remove(note);//removes note from database
+        notesAdapter.remove(note);
     }
 //    public void editNote(Note note)
 //    {
