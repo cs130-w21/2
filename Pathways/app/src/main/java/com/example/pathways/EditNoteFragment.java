@@ -84,20 +84,5 @@ public class EditNoteFragment extends DialogFragment {
             }
         });
 
-        editButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                NoteActivity activity = ((NoteActivity) getActivity());
-
-                EditText titleEditText = getView().findViewById(R.id.note_title);
-                String titleText = titleEditText.getText().toString();
-
-                EditText noteEditText = getView().findViewById(R.id.note_input_text);
-                String inputText = noteEditText.getText().toString();
-                activity.addNote(new Note(titleText, inputText));
-                dismiss();
-            }
-        });
-
     }
 }
