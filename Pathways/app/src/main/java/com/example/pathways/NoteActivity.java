@@ -13,6 +13,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
+
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -21,7 +23,6 @@ public class NoteActivity extends AppCompatActivity {
     NotesAdapter notesAdapter;
     FloatingActionButton addNoteButton;
     private Long tripId;
-    private Long locationId;
 
     private AppDatabase _db;
     private NoteDao _noteDao;
@@ -29,6 +30,9 @@ public class NoteActivity extends AppCompatActivity {
     private TripEntity _tripEntity;
     private Executor _executor = Executors.newSingleThreadExecutor();
     private ArrayList<Note> notes = new ArrayList<>();
+    private String _placeId = "";
+    private TextView _locationTextView;
+    private TextView _emptyNotesTextView;
 
 
     @Override
@@ -51,9 +55,24 @@ public class NoteActivity extends AppCompatActivity {
             }
         });
 
-        tripId = (Long) getIntent().getLongExtra("TRIP ID", 0);
-        //locationId = (Long) getIntent().getLongExtra("LOC ID", 0);
-        //addNote(new Note(tripId.toString(), tripId.toString()));
+        _emptyNotesTextView = findViewById(R.id.empty_notes_text);
+
+
+        tripId = getIntent().getLongExtra("TRIP ID", 0);
+
+        _locationTextView = findViewById(R.id.location_textview);
+        String[] idAndName = getIntent().getStringArrayExtra("PLACE ID AND NAME");
+        if (idAndName != null) {
+            _placeId = idAndName[0];
+            Log.v("PLACE", _placeId);
+            String locationText = "Location: " + idAndName[1];
+            _locationTextView.setText(locationText);
+            _locationTextView.setVisibility(View.VISIBLE);
+
+            String emptyNotesText = "Add notes for the location: " + idAndName[1];
+            _emptyNotesTextView.setText(emptyNotesText);
+        }
+
 
         addNoteButton = findViewById(R.id.addNoteButton);
         addNoteButton.setOnClickListener(new View.OnClickListener() {
@@ -62,14 +81,19 @@ public class NoteActivity extends AppCompatActivity {
                 showCreateDialog();
             }
         });
-        Long tripId = (Long) getIntent().getLongExtra("TRIP ID", 0);
-        Log.v("ID", tripId + ""); //change tripdao and everything here to note? which ones
+
+        Long tripId =  getIntent().getLongExtra("TRIP ID", 0);
         _executor.execute(() -> {
-                TripEntity tripEntity = _tripDao.findByID(tripId);
-                _tripEntity = tripEntity;
-                Log.v("NAME", tripEntity.tripName);
+                _tripEntity = _tripDao.findByID(tripId);
+                getSupportActionBar().setTitle(_tripEntity.tripName + " Journal");
+
+                if (_tripEntity.noteIds != null && _tripEntity.noteIds.size() > 0) {
+                    _emptyNotesTextView.setVisibility(View.GONE);
+                }
+
                 addNotesFromNoteIds(); //should add notes from tripEntity
         });
+
         notesAdapter = new NotesAdapter(this, notes);
         listView.setAdapter(notesAdapter);
     }
@@ -103,6 +127,7 @@ public class NoteActivity extends AppCompatActivity {
 
     public void addNote(Note note)
     {
+        _emptyNotesTextView.setVisibility(View.GONE);
         notesAdapter.add(note);
         //add note to database
         _executor.execute(() -> {
@@ -110,6 +135,7 @@ public class NoteActivity extends AppCompatActivity {
             noteEntity.date = note.created;
             noteEntity.text = note.text;
             noteEntity.title = note.title;
+            noteEntity.placeId = _placeId;
             //add placeId later
             //noteId auto generated here
             Long noteId = _noteDao.createNote(noteEntity);
@@ -128,10 +154,12 @@ public class NoteActivity extends AppCompatActivity {
             _tripEntity.noteIds = new ArrayList<>();
         }
         for(Long noteId : _tripEntity.noteIds){
-            noteEntity = _noteDao.findById(noteId); //returns a note entity
-            Note note = new Note(noteEntity);
-            notesAdapter.add(note);
-            Log.v("noteAct", note.title);
+            noteEntity = _noteDao.findById(noteId);
+            // If only looking at one location, filter by placeId.
+            if (_placeId.equals("") || _placeId.equals(noteEntity.placeId)) {
+                Note note = new Note(noteEntity);
+                notesAdapter.add(note);
+            }
         }
 
     }

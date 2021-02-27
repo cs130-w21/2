@@ -1,7 +1,6 @@
 package com.example.pathways;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +24,10 @@ public class LocationsListAdapter extends RecyclerView.Adapter<LocationsListAdap
         void onStopDeleted(String placeId);
 
         void onItemClicked(String placeId);
+
+        void addNoteForLocation(String placeId, String locationName);
+
+        void addImageForLocation(String placeId, String locationName);
     }
 
     public LocationsListAdapter(Context context,
@@ -50,14 +53,14 @@ public class LocationsListAdapter extends RecyclerView.Adapter<LocationsListAdap
             holder._textViewStopType.setText("Start Location");
             holder._textViewStopType.setVisibility(View.VISIBLE);
             holder._textViewDuration.setVisibility(View.GONE);
-            holder._imageButton.setVisibility(View.GONE);
+            holder._removeStopButton.setVisibility(View.GONE);
         } else if (position == _locations.size() - 1) {
             holder._textViewStopType.setText("End Location");
             holder._textViewStopType.setVisibility(View.VISIBLE);
-            holder._imageButton.setVisibility(View.GONE);
+            holder._removeStopButton.setVisibility(View.GONE);
         } else {
             holder._textViewStopType.setVisibility(View.GONE);
-            holder._imageButton.setVisibility(View.VISIBLE);
+            holder._removeStopButton.setVisibility(View.VISIBLE);
         }
 
         holder._textViewStopAddress.setVisibility(View.GONE);
@@ -89,7 +92,9 @@ public class LocationsListAdapter extends RecyclerView.Adapter<LocationsListAdap
         TextView _textViewStopType;
         TextView _textViewRating;
         TextView _textViewDuration;
-        ImageButton _imageButton;
+        ImageButton _removeStopButton;
+        ImageButton _addNoteButton;
+        ImageButton _addImageButton;
         RelativeLayout _listItem;
         String _placeId;
         AdapterCallbacks _adapterCallbacks;
@@ -105,8 +110,14 @@ public class LocationsListAdapter extends RecyclerView.Adapter<LocationsListAdap
             _textViewStopType = itemView.findViewById(R.id.text_view_stop_type);
             _textViewRating = itemView.findViewById(R.id.text_view_rating);
             _textViewDuration = itemView.findViewById(R.id.text_view_duration);
-            _imageButton = itemView.findViewById(R.id.delete_stop_button);
-            _imageButton.setOnClickListener(this);
+
+            _removeStopButton = itemView.findViewById(R.id.delete_stop_button);
+            _removeStopButton.setOnClickListener(this);
+            _addImageButton = itemView.findViewById(R.id.add_image_button);
+            _addImageButton.setOnClickListener(this);
+            _addNoteButton = itemView.findViewById(R.id.add_note_button);
+            _addNoteButton.setOnClickListener(this);
+
             _listItem = itemView.findViewById(R.id.layout_locations_list_item);
             _listItem.setOnClickListener(this);
             _adapterCallbacks = adapterCallbacks;
@@ -116,6 +127,10 @@ public class LocationsListAdapter extends RecyclerView.Adapter<LocationsListAdap
         public void onClick(View view) {
             if (view.getId() == R.id.delete_stop_button) {
                 _adapterCallbacks.onStopDeleted(_placeId);
+            } else if (view.getId() == R.id.add_image_button) {
+                _adapterCallbacks.addImageForLocation(_placeId, _textViewStopName.getText().toString());
+            } else if (view.getId() == R.id.add_note_button) {
+                _adapterCallbacks.addNoteForLocation(_placeId, _textViewStopName.getText().toString());
             } else {
                 _adapterCallbacks.onItemClicked(_placeId);
             }
