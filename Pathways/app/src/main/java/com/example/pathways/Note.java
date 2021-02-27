@@ -16,6 +16,7 @@ public class Note {
     public Note (String title, String text) {
         this.title = title;
         this.text = text;
+
         //created = new Date();
         String pattern = "MM/dd/yyyy";
         SimpleDateFormat df = new SimpleDateFormat(pattern);

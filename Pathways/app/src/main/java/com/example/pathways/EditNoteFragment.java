@@ -74,6 +74,30 @@ public class EditNoteFragment extends DialogFragment {
                 dismiss();
             }
         });
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                NoteActivity activity = ((NoteActivity) getActivity());
+                View position = getView().findViewById(R.id.position);
+                activity.deleteNote(note);
+                dismiss();
+            }
+        });
+
+        editButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                NoteActivity activity = ((NoteActivity) getActivity());
+
+                EditText titleEditText = getView().findViewById(R.id.note_title);
+                String titleText = titleEditText.getText().toString();
+
+                EditText noteEditText = getView().findViewById(R.id.note_input_text);
+                String inputText = noteEditText.getText().toString();
+                activity.addNote(new Note(titleText, inputText));
+                dismiss();
+            }
+        });
 
     }
 }

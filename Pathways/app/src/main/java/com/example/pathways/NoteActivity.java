@@ -133,6 +133,15 @@ public class NoteActivity extends AppCompatActivity {
             Log.v("adding", note.title);
         });
     }
+    public void deleteNote(Note note)
+    {
+        notesAdapter.remove(note);//removes note from database
+    }
+//    public void editNote(Note note)
+//    {
+//        notesAdapter.add(note); //adding note to data base
+//        NoteEntity noteEntity = new NoteEntity();
+//    }
 
     private void addNotesFromNoteIds() {
         NoteEntity noteEntity;
