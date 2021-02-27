@@ -4,26 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <!--
-    <com.google.android.material.appbar.AppBarLayout
+<!--<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".EditNoteFragment">-->
+    <TextView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:elevation="0dp">
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:paddingStart="6dp"
-            android:paddingLeft="6dp"
-            android:paddingEnd="16dp"
-            android:paddingRight="16dp"
-            app:contentInsetStartWithNavigation="0dp"
-            app:navigationIcon="@drawable/quantum_ic_clear_grey600_24" />
-
-    </com.google.android.material.appbar.AppBarLayout>
-    -->
-
+        android:layout_height="match_parent" />
+        //android:text="@string/hello_blank_fragment" />
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
@@ -31,7 +20,6 @@
         android:background="@color/quantum_white_100"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:orientation="vertical">
-
         <EditText
             android:id="@+id/note_title"
             android:hint="Title"
@@ -40,21 +28,28 @@
             android:inputType="text" />
         <EditText
             android:id="@+id/note_input_text"
-            android:hint="Enter journal text here"
+            android:hint="Edit journal text here"
             android:layout_width="fill_parent"
             android:layout_height="400dp"
             android:inputType="textMultiLine"
             android:lines="12"
             android:scrollbars="vertical" />
         <Button
-            android:id="@+id/create_note_button"
+            android:id="@+id/save_edit_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Create Note"
+            android:text="Save Edit"
             app:layout_anchor="@+id/frameLayout"
             app:layout_anchorGravity="center" />
         <Button
-            android:id="@+id/cancel_creation_button"
+            android:id="@+id/delete_note_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Delete"
+            app:layout_anchor="@+id/frameLayout"
+            app:layout_anchorGravity="center" />
+        <Button
+            android:id="@+id/cancel_edit_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Cancel"
@@ -63,6 +58,6 @@
 
     </LinearLayout>
 
-
-
+<!--
+</FrameLayout>-->
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
