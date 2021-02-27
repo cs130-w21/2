@@ -32,7 +32,7 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
 
 
     public ImageListAdapter(Context context,
-                                List<Bitmap> images, List<String> image_locations){
+                            List<Bitmap> images, List<String> image_locations){
         _layoutInflater = LayoutInflater.from(context);
         _images = images;
         _image_locations = image_locations;

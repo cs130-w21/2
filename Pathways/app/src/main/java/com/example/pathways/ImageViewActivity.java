@@ -82,22 +82,6 @@ public class ImageViewActivity extends AppCompatActivity {
         });
 
 
-        /*for(int i = 0; i < maxImages; i++)
-        {
-            String name = "targetimage" + i;
-            int id = getResources().getIdentifier(name, "id", getApplicationContext().getPackageName());
-            if(id != 0) {
-                i0 = (ImageView) findViewById(id);
-                targetImages.add(i0);
-            }
-        }
-        i0 = (ImageView)findViewById(R.id.targetimage0);
-        targetImages.add(i0);
-        i1 = (ImageView)findViewById(R.id.targetimage1);
-        targetImages.add(i1);
-        i2 = (ImageView)findViewById(R.id.targetimage2);
-        targetImages.add(i2);*/
-
         buttonLoadImage.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View arg0) {
@@ -146,33 +130,6 @@ public class ImageViewActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-
-            //BitmapFactory.Options dbo = new BitmapFactory.Options();
-                //dbo.inSampleSize = 6;
-
-                //bitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(targetUri), null, dbo);
-                //i0.setImageBitmap(bitmap);
-
-
-
-                /*if(numImages < maxImages) {
-                    targetImages.get(numImages).setImageBitmap(bitmap);
-                    numImages++;
-                    /*curr.setImageBitmap(bitmap);
-                    if(curr == i0)
-                    {
-                        curr = i1;
-                    }
-                    else if(curr == i1)
-                    {
-                        curr = i2;
-                    }
-                    else
-                    {
-                        numImages = maxImages;
-                    }
-
-                }*/
 
         }
     }
