@@ -14,17 +14,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="400dp"
-            android:layout_height="400dp" />
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="400dp"
+                android:layout_height="400dp" />
 
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="400dp"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_marginTop="10dp"/>
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="400dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_marginTop="10dp"/>
         </androidx.appcompat.widget.LinearLayoutCompat>
 
     </androidx.cardview.widget.CardView>

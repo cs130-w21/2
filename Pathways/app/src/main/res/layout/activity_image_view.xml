@@ -6,6 +6,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/images_list_recycler_view">
+
+        </androidx.recyclerview.widget.RecyclerView>
+
+
+    </LinearLayout>
+
     <Button
         android:id="@+id/loadimage"
         android:layout_width="100dp"
@@ -19,17 +34,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/targetimage" />
-
-    <ImageView
-        android:id="@+id/targetimage"
-        android:layout_width="fill_parent"
-        android:layout_height="400dp"
-        android:layout_marginTop="107dp"
-        android:layout_marginBottom="107dp"
-        app:layout_constraintBottom_toTopOf="@+id/loadimage"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
