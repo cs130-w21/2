@@ -163,11 +163,6 @@ public class NoteActivity extends AppCompatActivity {
     {
         notesAdapter.remove(note);
     }
-//    public void editNote(Note note)
-//    {
-//        notesAdapter.add(note); //adding note to data base
-//        NoteEntity noteEntity = new NoteEntity();
-//    }
 
     private void addNotesFromNoteIds() {
         NoteEntity noteEntity;

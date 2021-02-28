@@ -47,6 +47,7 @@ public class EditNoteFragment extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+
         return inflater.inflate(R.layout.edit_note_fragment, container, false);
     }
 
@@ -83,6 +84,24 @@ public class EditNoteFragment extends DialogFragment {
                 dismiss();
             }
         });
+        editButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                NoteActivity activity = ((NoteActivity) getActivity());
+                activity.deleteNote(note);
+
+                EditText titleEditText = getView().findViewById(R.id.note_title);
+                String titleText = titleEditText.getText().toString();
+
+                EditText noteEditText = getView().findViewById(R.id.note_input_text);
+                String inputText = noteEditText.getText().toString();
+                activity.addNote(new Note(titleText, inputText));
+                dismiss();
+            }
+        });
+
+
 
     }
 }
