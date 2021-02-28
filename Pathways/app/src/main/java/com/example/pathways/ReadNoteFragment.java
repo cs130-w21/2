@@ -14,11 +14,19 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
-public class CreateNoteFragment extends DialogFragment {
-    private Button createButton;
+public class ReadNoteFragment extends DialogFragment {
     private Button cancelButton;
+    private Button editButton;
+    private Note note;
+    private TextView title;
+    private TextView date;
+    private TextView content;
 
+    ReadNoteFragment(Note n) {
+        note = n;
+    }
 
     @Override
     public void onStart() {
@@ -37,9 +45,8 @@ public class CreateNoteFragment extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout to use as dialog or embedded fragment
-        return inflater.inflate(R.layout.fragment_create_note, container, false);
+        return inflater.inflate(R.layout.fragment_read_note, container, false);
     }
-
 
     /** The system calls this only when creating the layout in a dialog. */
     @Override
@@ -55,23 +62,23 @@ public class CreateNoteFragment extends DialogFragment {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        createButton = getView().findViewById(R.id.create_note_button);
-        cancelButton = getView().findViewById(R.id.cancel_creation_button);
-        createButton.setOnClickListener(new View.OnClickListener() {
+        cancelButton = getView().findViewById(R.id.cancel_read_button);
+        editButton = getView().findViewById(R.id.edit_note_button);
+        title = getView().findViewById(R.id.noteTitle);
+        date = getView().findViewById(R.id.noteDate);
+        content = getView().findViewById(R.id.noteContent);
+
+        title.setText(note.title);
+        date.setText(note.created);
+        content.setText(note.text);
+
+        editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                NoteActivity activity = ((NoteActivity) getActivity());
-
-                EditText titleEditText = getView().findViewById(R.id.note_title);
-                String titleText = titleEditText.getText().toString();
-
-                EditText noteEditText = getView().findViewById(R.id.note_input_text);
-                String inputText = noteEditText.getText().toString();
-                activity.addNote(new Note(titleText, inputText));
-                dismiss();
+                NoteActivity noteActivity = (NoteActivity) getActivity();
+                noteActivity.showEditDialog(note);
             }
         });
-
 
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,6 +86,5 @@ public class CreateNoteFragment extends DialogFragment {
                 dismiss();
             }
         });
-
     }
 }

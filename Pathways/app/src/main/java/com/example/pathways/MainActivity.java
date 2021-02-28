@@ -1,5 +1,6 @@
 package com.example.pathways;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -81,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         @Override
                         public void run() {
                             _userDao.insert(_user);
+                            runOnUiThread(() -> recreate());
                         }
                     });
                 } else {
@@ -151,6 +153,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             public void run() {
                                 Log.v("Inserting trip: ", trip.tripName);
                                 Long tripId = _tripDao.insert(trip);
+
+                                Intent intent = new Intent(MainActivity.this, TripViewActivity.class);
+                                intent.putExtra("TRIP ID", tripId);
+                                startActivity(intent);
+
                                 trip.tripid = tripId;
                                 _tripList.add(trip);
                                 _tripNameList.add(trip.tripName);
@@ -162,9 +169,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 }
                                 _user.tripIds.add(tripId);
                                 _userDao.updateUser(_user);
-                                Intent intent = new Intent(MainActivity.this, TripViewActivity.class);
-                                intent.putExtra("TRIP ID", tripId);
-                                startActivity(intent);
+
                             }
                         });
 

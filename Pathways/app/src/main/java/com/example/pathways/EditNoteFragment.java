@@ -1,12 +1,12 @@
 package com.example.pathways;
 
+import android.os.Bundle;
 import android.app.Activity;
 import android.app.Dialog;
-import android.os.Bundle;
 
+import androidx.fragment.app.Fragment;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,10 +15,22 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 
-public class CreateNoteFragment extends DialogFragment {
-    private Button createButton;
-    private Button cancelButton;
+public class EditNoteFragment extends DialogFragment {
 
+    // TODO: Rename parameter arguments, choose names that match
+    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    private Button editButton;
+    private Button deleteButton;
+    private Button cancelButton;
+    private Note note;
+
+    // TODO: Rename and change types of parameters
+    private String mParam1;
+    private String mParam2;
+
+    public EditNoteFragment(Note n) {
+        note = n;
+    }
 
     @Override
     public void onStart() {
@@ -31,15 +43,13 @@ public class CreateNoteFragment extends DialogFragment {
         }
     }
 
-    /** The system calls this to get the DialogFragment's layout, regardless
-     of whether it's being displayed as a dialog or an embedded fragment. */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout to use as dialog or embedded fragment
-        return inflater.inflate(R.layout.fragment_create_note, container, false);
-    }
+        // Inflate the layout for this fragment
 
+        return inflater.inflate(R.layout.edit_note_fragment, container, false);
+    }
 
     /** The system calls this only when creating the layout in a dialog. */
     @Override
@@ -55,12 +65,31 @@ public class CreateNoteFragment extends DialogFragment {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        createButton = getView().findViewById(R.id.create_note_button);
-        cancelButton = getView().findViewById(R.id.cancel_creation_button);
-        createButton.setOnClickListener(new View.OnClickListener() {
+        cancelButton = getView().findViewById(R.id.cancel_edit_button);
+        deleteButton = getView().findViewById(R.id.delete_note_button);
+        editButton = getView().findViewById(R.id.save_edit_button);
+
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dismiss();
+            }
+        });
+        deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 NoteActivity activity = ((NoteActivity) getActivity());
+                View position = getView().findViewById(R.id.position);
+                activity.deleteNote(note);
+                dismiss();
+            }
+        });
+        editButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                NoteActivity activity = ((NoteActivity) getActivity());
+                activity.deleteNote(note);
 
                 EditText titleEditText = getView().findViewById(R.id.note_title);
                 String titleText = titleEditText.getText().toString();
@@ -73,12 +102,6 @@ public class CreateNoteFragment extends DialogFragment {
         });
 
 
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dismiss();
-            }
-        });
 
     }
 }

@@ -4,49 +4,102 @@ import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import androidx.annotation.RequiresPermission;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
+
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class NoteActivity extends AppCompatActivity {
     NotesAdapter notesAdapter;
     FloatingActionButton addNoteButton;
     private Long tripId;
-    private Long locationId;
+
+    private AppDatabase _db;
+    private NoteDao _noteDao;
+    private TripDao _tripDao;
+    private TripEntity _tripEntity;
+    private Executor _executor = Executors.newSingleThreadExecutor();
+    private ArrayList<Note> notes = new ArrayList<>();
+    private String _placeId = "";
+    private TextView _locationTextView;
+    private TextView _emptyNotesTextView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note_view);
         ((AppCompatActivity)this).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-
-        ArrayList notes = new ArrayList<Note>();
+        _db = DatabaseSingleton.getInstance(this);
+        _noteDao = _db.noteDao();
+        _tripDao = _db.tripDao();
 
         ListView listView = findViewById(R.id.noteListView);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-        notesAdapter = new NotesAdapter(this, notes);
-        listView.setAdapter(notesAdapter);
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view,
+                                    final int position, long id) {
+                Note clicked = (Note) listView.getItemAtPosition(position);
+                showReadDialog(clicked);
+            }
+        });
 
-        tripId = (Long) getIntent().getLongExtra("TRIP ID", 0);
-        //locationId = (Long) getIntent().getLongExtra("LOC ID", 0);
+        _emptyNotesTextView = findViewById(R.id.empty_notes_text);
 
-        //addNote(new Note(tripId.toString(), tripId.toString()));
+
+        tripId = getIntent().getLongExtra("TRIP ID", 0);
+
+        _locationTextView = findViewById(R.id.location_textview);
+        String[] idAndName = getIntent().getStringArrayExtra("PLACE ID AND NAME");
+        if (idAndName != null) {
+            _placeId = idAndName[0];
+            Log.v("PLACE", _placeId);
+            String locationText = "Location: " + idAndName[1];
+            _locationTextView.setText(locationText);
+            _locationTextView.setVisibility(View.VISIBLE);
+
+            String emptyNotesText = "Add notes for the location: " + idAndName[1];
+            _emptyNotesTextView.setText(emptyNotesText);
+        }
+
 
         addNoteButton = findViewById(R.id.addNoteButton);
         addNoteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showDialog();
+                showCreateDialog();
             }
         });
+
+        Long tripId =  getIntent().getLongExtra("TRIP ID", 0);
+        _executor.execute(() -> {
+                _tripEntity = _tripDao.findByID(tripId);
+                getSupportActionBar().setTitle(_tripEntity.tripName + " Journal");
+
+                if (_tripEntity.noteIds != null && _tripEntity.noteIds.size() > 0) {
+                    _emptyNotesTextView.setVisibility(View.GONE);
+                }
+
+                addNotesFromNoteIds(); //should add notes from tripEntity
+        });
+
+        notesAdapter = new NotesAdapter(this, notes);
+        listView.setAdapter(notesAdapter);
     }
 
     // Reference: https://developer.android.com/guide/topics/ui/dialogs#FullscreenDialog
-    public void showDialog() {
+    public void showCreateDialog() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         CreateNoteFragment newFragment = new CreateNoteFragment();
 
@@ -59,8 +112,70 @@ public class NoteActivity extends AppCompatActivity {
                 .addToBackStack(null).commit();
 
     }
+    public void showReadDialog(Note note) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        ReadNoteFragment newFragment = new ReadNoteFragment(note);
 
-    public void addNote(Note note) {
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        // For a little polish, specify a transition animation
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        // To make it fullscreen, use the 'content' root view as the container
+        // for the fragment, which is always the root view for the activity
+        transaction.add(android.R.id.content, newFragment)
+                .addToBackStack(null).commit();
+    }
+    public void showEditDialog(Note note) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        EditNoteFragment newFragment = new EditNoteFragment(note);
+
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        // For a little polish, specify a transition animation
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        // To make it fullscreen, use the 'content' root view as the container
+        // for the fragment, which is always the root view for the activity
+        transaction.add(android.R.id.content, newFragment)
+                .addToBackStack(null).commit();
+    }
+
+    public void addNote(Note note)
+    {
+        _emptyNotesTextView.setVisibility(View.GONE);
         notesAdapter.add(note);
+        //add note to database
+        _executor.execute(() -> {
+            NoteEntity noteEntity = new NoteEntity();
+            noteEntity.date = note.created;
+            noteEntity.text = note.text;
+            noteEntity.title = note.title;
+            noteEntity.placeId = _placeId;
+            //add placeId later
+            //noteId auto generated here
+            Long noteId = _noteDao.createNote(noteEntity);
+            if(_tripEntity.noteIds == null){
+                _tripEntity.noteIds = new ArrayList<>();
+            }
+            _tripEntity.noteIds.add(noteId);
+            _tripDao.updateTrips(_tripEntity);
+            Log.v("adding", note.title);
+        });
+    }
+    public void deleteNote(Note note)
+    {
+        notesAdapter.remove(note);
+    }
+
+    private void addNotesFromNoteIds() {
+        NoteEntity noteEntity;
+        if(_tripEntity.noteIds == null){
+            _tripEntity.noteIds = new ArrayList<>();
+        }
+        for(Long noteId : _tripEntity.noteIds){
+            noteEntity = _noteDao.findById(noteId);
+            // If only looking at one location, filter by placeId.
+            if (_placeId.equals("") || _placeId.equals(noteEntity.placeId)) {
+                Note note = new Note(noteEntity);
+                notesAdapter.add(note);
+            }
+        }
     }
 }
