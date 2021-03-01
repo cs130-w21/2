@@ -11,7 +11,9 @@
         android:layout_height="match_parent"
         android:background="@color/quantum_white_100"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_marginLeft="8dp"
+        >
 
         <TextView
             android:id="@+id/noteTitle"
@@ -30,9 +32,22 @@
             android:layout_below="@+id/noteTitle"
             android:layout_marginTop="0dp"
             android:layout_marginBottom="0dp"
-            android:padding="10dip"
+            android:padding="6dip"
             android:text="Date"
             android:textSize="20dip"
+            android:textStyle="italic"/>
+
+        <TextView
+            android:id="@+id/noteLocation"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/noteDate"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="0dp"
+            android:padding="6dip"
+            android:text="Location"
+            android:textSize="18dip"
             android:textStyle="italic"/>
 
         <TextView
@@ -40,10 +55,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@+id/edit_note_button"
-            android:layout_below="@+id/noteDate"
+            android:layout_below="@+id/noteLocation"
             android:layout_marginTop="0dp"
             android:layout_marginBottom="0dp"
-            android:padding="10dip"
+            android:padding="6dip"
             android:text="Content"
             android:textSize="20dip" />
 

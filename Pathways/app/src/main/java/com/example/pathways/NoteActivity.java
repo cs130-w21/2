@@ -31,6 +31,7 @@ public class NoteActivity extends AppCompatActivity {
     private Executor _executor = Executors.newSingleThreadExecutor();
     private ArrayList<Note> notes = new ArrayList<>();
     private String _placeId = "";
+    private String _locationName = "";
     private TextView _locationTextView;
     private TextView _emptyNotesTextView;
 
@@ -64,8 +65,9 @@ public class NoteActivity extends AppCompatActivity {
         String[] idAndName = getIntent().getStringArrayExtra("PLACE ID AND NAME");
         if (idAndName != null) {
             _placeId = idAndName[0];
-            Log.v("PLACE", _placeId);
-            String locationText = "Location: " + idAndName[1];
+            _locationName = idAndName[1];
+
+            String locationText = "Location: " + _locationName;
             _locationTextView.setText(locationText);
             _locationTextView.setVisibility(View.VISIBLE);
 
@@ -136,6 +138,7 @@ public class NoteActivity extends AppCompatActivity {
     public void addNote(Note note)
     {
         _emptyNotesTextView.setVisibility(View.GONE);
+        note.location = _locationName;
         notesAdapter.add(note);
         //add note to database
         _executor.execute(() -> {
@@ -144,6 +147,7 @@ public class NoteActivity extends AppCompatActivity {
             noteEntity.text = note.text;
             noteEntity.title = note.title;
             noteEntity.placeId = _placeId;
+            noteEntity.locationName = _locationName;
             //add placeId later
             //noteId auto generated here
             Long noteId = _noteDao.createNote(noteEntity);

@@ -38,6 +38,7 @@ public class NotesAdapter extends ArrayAdapter<Note> {
         noteTitle.setText(note.title);
         noteDate.setText(dateStr);
         noteText.setText(textStr);
+
         // Return the completed view to render on screen
         return convertView;
     }

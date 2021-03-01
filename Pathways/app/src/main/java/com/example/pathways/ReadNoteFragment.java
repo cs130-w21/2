@@ -72,6 +72,14 @@ public class ReadNoteFragment extends DialogFragment {
         date.setText(note.created);
         content.setText(note.text);
 
+        TextView noteLocation = getView().findViewById(R.id.noteLocation);
+
+        String location = note.location;
+        if (!location.isEmpty()) {
+            noteLocation.setVisibility(View.VISIBLE);
+            noteLocation.setText(location);
+        }
+
         editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
