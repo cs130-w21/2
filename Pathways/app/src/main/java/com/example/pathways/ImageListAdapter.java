@@ -1,6 +1,7 @@
 package com.example.pathways;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
@@ -27,6 +28,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import android.view.View.OnClickListener;
 
 
 
@@ -34,8 +36,7 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
     private List<ImageEntity> _imageEntities = new ArrayList<>();
     private LayoutInflater _layoutInflater;
     private Context _context;
-
-
+    private OnClickListener _OnClickListener;
 
     public ImageListAdapter(Context context,
                             List<ImageEntity> images){
@@ -59,6 +60,16 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
 
         BitmapFactory.Options dbo = new BitmapFactory.Options();
         dbo.inSampleSize = 6;
+        _OnClickListener = new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(_context, PhotoViewActivity.class);
+                intent.putExtra("URI", imageEntity.imageUri);
+                _context.startActivity(intent);
+            }
+        };
+        holder.itemView.setOnClickListener(_OnClickListener);
+
 
         try {
             Bitmap bitmap = BitmapFactory.decodeStream(_context.getContentResolver().openInputStream(Uri.parse(imageEntity.imageUri)), null, dbo);
