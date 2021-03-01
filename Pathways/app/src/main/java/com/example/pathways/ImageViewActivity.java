@@ -1,4 +1,5 @@
 package com.example.pathways;
+
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -17,7 +18,10 @@ import android.content.Context;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
+import android.widget.TextView;
+
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -44,9 +48,12 @@ public class ImageViewActivity extends AppCompatActivity {
     private String _placeId = "";
     private String _locationName = "";
     private ArrayList<ImageEntity> _imageEntities = new ArrayList<>();
+    private TextView _emptyNotesTextView;
+    private TextView _locationTextView;
+
 
     @Override
-    protected void onCreate(Bundle savedInstanceState){
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_view);
 
@@ -56,6 +63,9 @@ public class ImageViewActivity extends AppCompatActivity {
         _db = DatabaseSingleton.getInstance(this);
         _tripDao = _db.tripDao();
         _imageDao = _db.imageDao();
+
+        _emptyNotesTextView = findViewById(R.id.empty_images_text);
+
 
         RecyclerView imagesList = findViewById(R.id.images_list_recycler_view);
 
@@ -74,8 +84,22 @@ public class ImageViewActivity extends AppCompatActivity {
             addImagesFromImageIds();
         });
 
+        _locationTextView = findViewById(R.id.location_textview);
+        String[] idAndName = getIntent().getStringArrayExtra("PLACE ID AND NAME");
+        if (idAndName != null) {
+            _placeId = idAndName[0];
+            _locationName = idAndName[1];
 
-        buttonLoadImage.setOnClickListener(new Button.OnClickListener(){
+            String locationText = "Location: " + _locationName;
+            _locationTextView.setText(locationText);
+            _locationTextView.setVisibility(View.VISIBLE);
+
+            String emptyNotesText = "Add images for the location: " + idAndName[1];
+            _emptyNotesTextView.setText(emptyNotesText);
+        }
+
+
+        buttonLoadImage.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View arg0) {
                 Intent intent = new Intent();
@@ -83,20 +107,22 @@ public class ImageViewActivity extends AppCompatActivity {
                 intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
                 startActivityForResult(Intent.createChooser(intent, "Select Picture"), 1);
-            }});
+            }
+        });
     }
 
     private void addImagesFromImageIds() {
-        if(_tripEntity.imageIds == null){
+        if (_tripEntity.imageIds == null) {
             _tripEntity.imageIds = new ArrayList<>();
         }
 
         ImageEntity imageEntity;
-        for(Long imageId : _tripEntity.imageIds){
+        for (Long imageId : _tripEntity.imageIds) {
             imageEntity = _imageDao.findById(imageId);
             // If only looking at one location, filter by placeId.
             if (_placeId.equals("") || _placeId.equals(imageEntity.placeId)) {
                 _imageEntities.add(imageEntity);
+                _emptyNotesTextView.setVisibility(View.GONE);
             }
         }
         _imagesListAdapter.notifyDataSetChanged();
@@ -114,10 +140,11 @@ public class ImageViewActivity extends AppCompatActivity {
                     | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             try {
                 getContentResolver().takePersistableUriPermission(targetUri, takeFlags);
-            }
-            catch (SecurityException e){
+            } catch (SecurityException e) {
                 e.printStackTrace();
             }
+
+            _emptyNotesTextView.setVisibility(View.GONE);
 
             ImageEntity imageEntity = new ImageEntity();
             imageEntity.locationName = _locationName;

@@ -466,6 +466,9 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
 
     @Override
     public void addImageForLocation(String placeId, String locationName) {
-
+        Intent intent = new Intent(TripViewActivity.this, ImageViewActivity.class);
+        intent.putExtra("PLACE ID AND NAME", new String[]{placeId, locationName});
+        intent.putExtra("TRIP ID", _tripEntity.tripid);
+        startActivity(intent);
     }
 }

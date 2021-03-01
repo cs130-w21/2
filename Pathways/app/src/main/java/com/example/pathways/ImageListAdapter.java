@@ -65,8 +65,11 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
             holder._imageView.setImageBitmap(ThumbnailUtils.extractThumbnail(bitmap, 200, 300));
 
             String location = _imageEntities.get(position).locationName;
+            Log.v("LOCATION", location);
+
             if (!location.isEmpty()) {
-                holder._location.setText("Location:\n " + location);
+                holder._locationLabel.setVisibility(View.VISIBLE);
+                holder._location.setText(location);
                 holder._location.setVisibility(View.VISIBLE);
             }
 
@@ -87,13 +90,14 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
         ImageView _imageView;
         TextView _dateAdded;
         TextView _location;
-        RelativeLayout _listItem;
+        TextView _locationLabel;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             _imageView = itemView.findViewById(R.id.imageView);
             _dateAdded = itemView.findViewById(R.id.dateAdded);
             _location = itemView.findViewById(R.id.location);
+            _locationLabel = itemView.findViewById(R.id.location_label);
 
         }
 

@@ -46,6 +46,14 @@
                     android:layout_marginTop="10dp"/>
 
                 <TextView
+                    android:id="@+id/location_label"
+                    android:text="Location:"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:layout_marginTop="10dp"/>
+
+                <TextView
                     android:id="@+id/location"
                     android:visibility="gone"
                     android:layout_width="wrap_content"

@@ -73,7 +73,6 @@ public class NoteActivity extends AppCompatActivity {
             _emptyNotesTextView.setText(emptyNotesText);
         }
 
-
         addNoteButton = findViewById(R.id.addNoteButton);
         addNoteButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -87,9 +86,6 @@ public class NoteActivity extends AppCompatActivity {
                 _tripEntity = _tripDao.findByID(tripId);
                 getSupportActionBar().setTitle(_tripEntity.tripName + " Journal");
 
-                if (_tripEntity.noteIds != null && _tripEntity.noteIds.size() > 0) {
-                    _emptyNotesTextView.setVisibility(View.GONE);
-                }
 
                 addNotesFromNoteIds(); //should add notes from tripEntity
         });
@@ -175,6 +171,7 @@ public class NoteActivity extends AppCompatActivity {
             if (_placeId.equals("") || _placeId.equals(noteEntity.placeId)) {
                 Note note = new Note(noteEntity);
                 notesAdapter.add(note);
+                _emptyNotesTextView.setVisibility(View.GONE);
             }
         }
     }
