@@ -355,8 +355,6 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
 
     private void generateTripFromTripEntity() {
         _trip = new Trip(_tripEntity.tripName);
-        _trip.setImages(_tripEntity.imageBitmaps,_tripEntity.imageText);
-        _trip.setNoteIds(_tripEntity.noteIds);
 
         if (_tripEntity.placeIds == null) {
             Log.v("YO", "Place null");

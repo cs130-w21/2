@@ -28,12 +28,8 @@ public class TripEntity implements Serializable {
     public List<Long> noteIds;
 
     @TypeConverters(ListToStringConverter.class)
-    @ColumnInfo(name = "image_bitmaps")
-    public List<Bitmap> imageBitmaps;
-
-    @TypeConverters(ListToStringConverter.class)
-    @ColumnInfo(name = "image_text")
-    public List<String> imageText;
+    @ColumnInfo(name = "image_ids")
+    public List<Long> imageIds;
 
     @TypeConverters(ListToStringConverter.class)
     @ColumnInfo(name = "song_infos")

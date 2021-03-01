@@ -1,7 +1,9 @@
 package com.example.pathways;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +19,9 @@ import android.provider.MediaStore;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.squareup.picasso.Picasso;
+
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,17 +30,17 @@ import java.util.List;
 
 
 public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.ViewHolder> {
-    private List<Bitmap> _images = new ArrayList<>();
-    private List<String> _image_locations = new ArrayList<>();
+    private List<ImageEntity> _imageEntities = new ArrayList<>();
     private LayoutInflater _layoutInflater;
+    private Context _context;
 
 
 
     public ImageListAdapter(Context context,
-                            List<Bitmap> images, List<String> image_locations){
+                            List<ImageEntity> images){
         _layoutInflater = LayoutInflater.from(context);
-        _images = images;
-        _image_locations = image_locations;
+        _imageEntities = images;
+        _context = context;
     }
 
     @NonNull
@@ -47,22 +52,48 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
 
     @Override
     public void onBindViewHolder(@NonNull ImageListAdapter.ViewHolder holder, int position) {
-        Bitmap bitmap = _images.get(position);
-        String text = _image_locations.get(position);
-        holder._textView.setText(text);
-        if (bitmap != null) {
+        ImageEntity imageEntity = _imageEntities.get(position);
+
+        Log.v("URI", imageEntity.imageUri);
+
+        BitmapFactory.Options dbo = new BitmapFactory.Options();
+        dbo.inSampleSize = 6;
+
+        try {
+            Bitmap bitmap = BitmapFactory.decodeStream(_context.getContentResolver().openInputStream(Uri.parse(imageEntity.imageUri)), null, dbo);
             holder._imageView.setImageBitmap(bitmap);
-        } else {
-            holder._imageView.setImageBitmap(null);
+
+            String text = _imageEntities.get(position).locationName;
+            holder._textView.setText(text);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
+
 
 
 
     }
 
+    private String getRealPathFromURI(Uri contentUri) {
+        Cursor cursor = null;
+        try {
+            String[] proj = {MediaStore.Images.Media.DATA};
+            cursor = _context.getContentResolver().query(contentUri, proj, null, null,
+                    null);
+            int column_index = cursor
+                    .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+        }
+    }
+
     @Override
     public int getItemCount() {
-        return _images.size();
+        return _imageEntities.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

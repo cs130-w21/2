@@ -7,8 +7,6 @@ import android.graphics.Bitmap;
 public class Trip {
     private ArrayList<Location> _locations = new ArrayList<>();
     private String _name;
-    private List<Bitmap> _images = new ArrayList<>();
-    private List<String> _image_locations = new ArrayList<>();
     private List<Long> _noteIds;
 
     public Trip() {}
@@ -73,28 +71,6 @@ public class Trip {
             }
         }
     }
-
-    public List<Bitmap> getImages() {
-        return _images;
-    }
-    public List<String> getImageNames() {
-        return _image_locations;
-    }
-
-    public void addImage(Bitmap bitmap) {
-        this._images.add(bitmap);
-        this._image_locations.add(this._name);
-    }
-    public void addImage(Bitmap bitmap, String place) {
-        this._images.add(bitmap);
-        this._image_locations.add(place);
-    }
-
-    public void setImages(List<Bitmap> _images, List<String> _image_locations) {
-        this._images = _images;
-        this._image_locations = _image_locations;
-    }
-    public int getNumImages() {return _images.size();}
 
     public List<Long> getNoteIds() {
         return _noteIds;

@@ -3,7 +3,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -12,6 +14,7 @@ import android.widget.ImageView;
 import android.content.Context;
 
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -27,19 +30,16 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 public class ImageViewActivity extends AppCompatActivity {
-    List<ImageView> targetImages = new ArrayList<>();
-    List<String> ImageTexts = new ArrayList<>();
-    ImageView i0;
-    String ImageText;
-    int numImages = 0;
-    //int maxImages = 6;
     private AppDatabase _db;
     private TripDao _tripDao;
+    private ImageDao _imageDao;
     private Executor _executor = Executors.newSingleThreadExecutor();
     private ImageListAdapter _imagesListAdapter;
-    private Trip _trip;
     // Database entity
     private TripEntity _tripEntity;
+    private String _placeId = "";
+    private String _locationName = "";
+    private ArrayList<ImageEntity> _imageEntities = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -51,34 +51,23 @@ public class ImageViewActivity extends AppCompatActivity {
 
         _db = DatabaseSingleton.getInstance(this);
         _tripDao = _db.tripDao();
+        _imageDao = _db.imageDao();
 
         RecyclerView imagesList = findViewById(R.id.images_list_recycler_view);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         imagesList.setLayoutManager(layoutManager);
 
+        _imagesListAdapter = new ImageListAdapter(this, _imageEntities);
+        imagesList.setAdapter(_imagesListAdapter);
+
         Long tripId = (Long) getIntent().getLongExtra("TRIP ID", 0);
         Log.v("ID", tripId + "");
         _executor.execute(() -> {
             TripEntity tripEntity = _tripDao.findByID(tripId);
             _tripEntity = tripEntity;
-            Log.v("NAME", tripEntity.tripName);
-            _trip = new Trip(_tripEntity.tripName);
-            List<Bitmap> savedImages = _tripEntity.imageBitmaps;
-            List<String> ImageTexts = _tripEntity.imageText;
 
-            if (savedImages == null)
-            {
-                _imagesListAdapter = new ImageListAdapter(this, _trip.getImages(), _trip.getImageNames());
-            }
-            else {
-                _trip.setImages(savedImages, ImageTexts);
-                int numSavedImages = _trip.getNumImages();
-                Log.v("NUM_SAVED_IMAGES", numSavedImages + "");
-
-                _imagesListAdapter = new ImageListAdapter(this, savedImages, ImageTexts);
-            }
-            imagesList.setAdapter(_imagesListAdapter);
+            addImagesFromImageIds();
         });
 
 
@@ -94,11 +83,11 @@ public class ImageViewActivity extends AppCompatActivity {
                         .setPositiveButton("Add", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                ImageText = String.valueOf(taskEditText.getText());
-                                Intent intent = new Intent(Intent.ACTION_PICK,
-                                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                                startActivityForResult(intent, 0);
-
+                                Intent intent = new Intent();
+                                intent.setType("image/*");
+                                intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
+                                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                                startActivityForResult(Intent.createChooser(intent, "Select Picture"), 1);
                             }
                         })
                         .setNegativeButton("Cancel", null)
@@ -107,28 +96,57 @@ public class ImageViewActivity extends AppCompatActivity {
             }});
     }
 
+    private void addImagesFromImageIds() {
+        if(_tripEntity.imageIds == null){
+            _tripEntity.imageIds = new ArrayList<>();
+        }
+
+        ImageEntity imageEntity;
+        for(Long imageId : _tripEntity.imageIds){
+            imageEntity = _imageDao.findById(imageId);
+            // If only looking at one location, filter by placeId.
+            if (_placeId.equals("") || _placeId.equals(imageEntity.placeId)) {
+                _imageEntities.add(imageEntity);
+            }
+        }
+        _imagesListAdapter.notifyDataSetChanged();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == RESULT_OK) {
             Uri targetUri = data.getData();
-            try{
-                BitmapFactory.Options dbo = new BitmapFactory.Options();
-                dbo.inSampleSize = 6;
-
-                Bitmap bitmap = BitmapFactory.decodeStream(getContentResolver().openInputStream(targetUri), null, dbo);
-                _trip.addImage(bitmap, ImageText);
-                _tripEntity.imageBitmaps = _trip.getImages();
-                _tripEntity.imageText = _trip.getImageNames();
-
-                _executor.execute(() -> _tripDao.updateTrips(_tripEntity));
-
-                _imagesListAdapter.notifyDataSetChanged();
+            final int takeFlags = data.getFlags()
+                    & (Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            try {
+                getContentResolver().takePersistableUriPermission(targetUri, takeFlags);
             }
-            catch (FileNotFoundException e) {
+            catch (SecurityException e){
                 e.printStackTrace();
             }
+
+            ImageEntity imageEntity = new ImageEntity();
+            imageEntity.locationName = _locationName.isEmpty() ? _tripEntity.tripName : _locationName;
+            imageEntity.placeId = _placeId;
+            imageEntity.imageUri = targetUri.toString();
+
+            _executor.execute(() -> {
+                Long imageId = _imageDao.insertImage(imageEntity);
+                imageEntity.imageId = imageId;
+                _imageEntities.add(imageEntity);
+                runOnUiThread(() -> _imagesListAdapter.notifyDataSetChanged());
+
+                if (_tripEntity.imageIds == null) {
+                    _tripEntity.imageIds = new ArrayList<>();
+                }
+
+                _tripEntity.imageIds.add(imageId);
+                _tripDao.updateTrips(_tripEntity);
+            });
 
 
         }
