@@ -23,6 +23,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
 import java.io.FileNotFoundException;
@@ -46,7 +50,7 @@ public class ImageViewActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_view);
 
-        Button buttonLoadImage = (Button)findViewById(R.id.loadimage);
+        FloatingActionButton buttonLoadImage = (FloatingActionButton) findViewById(R.id.loadimage);
         //i0 = (ImageView) findViewById(R.id.targetimage0);
 
         _db = DatabaseSingleton.getInstance(this);
@@ -74,25 +78,11 @@ public class ImageViewActivity extends AppCompatActivity {
         buttonLoadImage.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View arg0) {
-                Context c = ImageViewActivity.this;
-                EditText taskEditText = new EditText(c);
-                AlertDialog dialog = new AlertDialog.Builder(c)
-                        .setTitle("Location")
-                        .setMessage(" ")
-                        .setView(taskEditText)
-                        .setPositiveButton("Add", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Intent intent = new Intent();
-                                intent.setType("image/*");
-                                intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
-                                intent.addCategory(Intent.CATEGORY_OPENABLE);
-                                startActivityForResult(Intent.createChooser(intent, "Select Picture"), 1);
-                            }
-                        })
-                        .setNegativeButton("Cancel", null)
-                        .create();
-                dialog.show();
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                startActivityForResult(Intent.createChooser(intent, "Select Picture"), 1);
             }});
     }
 
@@ -130,9 +120,11 @@ public class ImageViewActivity extends AppCompatActivity {
             }
 
             ImageEntity imageEntity = new ImageEntity();
-            imageEntity.locationName = _locationName.isEmpty() ? _tripEntity.tripName : _locationName;
+            imageEntity.locationName = _locationName;
             imageEntity.placeId = _placeId;
             imageEntity.imageUri = targetUri.toString();
+            SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+            imageEntity.date = df.format(new Date());
 
             _executor.execute(() -> {
                 Long imageId = _imageDao.insertImage(imageEntity);

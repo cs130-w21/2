@@ -23,4 +23,7 @@ public class ImageEntity {
 
     @ColumnInfo(name = "image_placeId")
     public String placeId;
+
+    @ColumnInfo(name = "image_date")
+    public String date;
 }

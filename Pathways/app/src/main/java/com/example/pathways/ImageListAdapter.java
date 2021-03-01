@@ -3,6 +3,7 @@ package com.example.pathways;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
+import android.media.ThumbnailUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -61,34 +62,20 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
 
         try {
             Bitmap bitmap = BitmapFactory.decodeStream(_context.getContentResolver().openInputStream(Uri.parse(imageEntity.imageUri)), null, dbo);
-            holder._imageView.setImageBitmap(bitmap);
+            holder._imageView.setImageBitmap(ThumbnailUtils.extractThumbnail(bitmap, 200, 300));
 
-            String text = _imageEntities.get(position).locationName;
-            holder._textView.setText(text);
+            String location = _imageEntities.get(position).locationName;
+            if (!location.isEmpty()) {
+                holder._location.setText("Location:\n " + location);
+                holder._location.setVisibility(View.VISIBLE);
+            }
+
+            holder._dateAdded.setText(_imageEntities.get(position).date);
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
 
-
-
-
-    }
-
-    private String getRealPathFromURI(Uri contentUri) {
-        Cursor cursor = null;
-        try {
-            String[] proj = {MediaStore.Images.Media.DATA};
-            cursor = _context.getContentResolver().query(contentUri, proj, null, null,
-                    null);
-            int column_index = cursor
-                    .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
     }
 
     @Override
@@ -98,13 +85,15 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         ImageView _imageView;
-        TextView _textView;
+        TextView _dateAdded;
+        TextView _location;
         RelativeLayout _listItem;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             _imageView = itemView.findViewById(R.id.imageView);
-            _textView = itemView.findViewById(R.id.textView);
+            _dateAdded = itemView.findViewById(R.id.dateAdded);
+            _location = itemView.findViewById(R.id.location);
 
         }
 
