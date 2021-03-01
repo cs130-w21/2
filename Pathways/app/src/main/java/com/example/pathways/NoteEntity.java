@@ -16,6 +16,9 @@ public class NoteEntity {
     @ColumnInfo(name = "note_placeId")
     public String placeId;
 
+    @ColumnInfo(name = "note_location")
+    public String locationName;
+
     @ColumnInfo(name = "note_title")
     public String title;
 

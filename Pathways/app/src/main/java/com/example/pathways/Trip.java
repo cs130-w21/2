@@ -2,11 +2,11 @@ package com.example.pathways;
 
 import java.util.ArrayList;
 import java.util.List;
+import android.graphics.Bitmap;
 
 public class Trip {
     private ArrayList<Location> _locations = new ArrayList<>();
     private String _name;
-    private List<String> _images;
     private List<Long> _noteIds;
 
     public Trip() {}
@@ -70,14 +70,6 @@ public class Trip {
                 break;
             }
         }
-    }
-
-    public List<String> getImages() {
-        return _images;
-    }
-
-    public void setImages(List<String> _images) {
-        this._images = _images;
     }
 
     public List<Long> getNoteIds() {

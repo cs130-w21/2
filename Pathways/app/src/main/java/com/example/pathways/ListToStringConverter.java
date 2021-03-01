@@ -1,5 +1,6 @@
 package com.example.pathways;
 
+import android.graphics.Bitmap;
 import androidx.room.TypeConverter;
 
 import com.google.gson.Gson;
@@ -36,6 +37,22 @@ public class ListToStringConverter {
         }
 
         Type listType = new TypeToken<List<SpotifyActivity.SongInfo>>() {}.getType();
+
+        return _gson.fromJson(data, listType);
+    }
+
+    @TypeConverter
+    public static String BitmapListToString(List<Bitmap> someObjects) {
+        return _gson.toJson(someObjects);
+    }
+
+    @TypeConverter
+    public static List<Bitmap> stringToBitmapList(String data) {
+        if (data == null) {
+            return Collections.emptyList();
+        }
+
+        Type listType = new TypeToken<List<Bitmap>>() {}.getType();
 
         return _gson.fromJson(data, listType);
     }
