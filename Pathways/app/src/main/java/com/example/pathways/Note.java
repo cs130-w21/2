@@ -8,6 +8,7 @@ import java.text.DateFormat;
 import java.util.Date;
 
 public class Note {
+    public long id;
     public Trip trip;
     public String location;
     public String title;
@@ -22,6 +23,7 @@ public class Note {
         created = df.format(new Date());
     }
     public Note (NoteEntity noteEntity) {
+        this.id = noteEntity.noteId;
         this.title = noteEntity.title;
         this.text = noteEntity.text;
         this.created = noteEntity.date;

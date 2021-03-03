@@ -85,6 +85,7 @@ public class ReadNoteFragment extends DialogFragment {
             public void onClick(View view) {
                 NoteActivity noteActivity = (NoteActivity) getActivity();
                 noteActivity.showEditDialog(note);
+                dismiss();
             }
         });
 
