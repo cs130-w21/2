@@ -1,5 +1,7 @@
 package com.example.pathways;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -7,6 +9,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.gms.common.api.Status;
@@ -36,6 +39,8 @@ import com.google.maps.model.DirectionsRoute;
 import com.google.maps.model.LatLng;
 
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -57,6 +62,8 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
     private LocationsListAdapter _locationsListAdapter;
     private AppDatabase _db;
     private TripDao _tripDao;
+    private UserDao _userDao;
+    private String _userEmail;
     private AutocompleteSupportFragment _autocompleteFragment;
     private GeoApiContext _geoApiContext;
     private Polyline _routePolyline;
@@ -66,6 +73,7 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
     private TextView _startLocationTextView;
     private TextView _destinationTextView;
     FloatingActionButton  _imageFab, _menuFab, _musicFab, _noteFab;
+    AppCompatImageButton _deleteTripButton;
     private boolean _isFabOpen = false;
 
     enum LocationType {
@@ -100,8 +108,11 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
 
         _db = DatabaseSingleton.getInstance(this);
         _tripDao = _db.tripDao();
+        _userDao = _db.userDao();
 
         Long tripId = (Long) getIntent().getLongExtra("TRIP ID", 0);
+        _userEmail = getIntent().getStringExtra("EMAIL");
+
         Log.v("ID", tripId + "");
         _executor.execute(() -> {
             TripEntity tripEntity = _tripDao.findByID(tripId);
@@ -166,8 +177,40 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
                 startActivity(intent);
             }
         });
+
+        _deleteTripButton = findViewById(R.id.delete_trip_button);
+        _deleteTripButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                deleteTripButton(TripViewActivity.this);
+            }
+        });
     }
 
+    private void deleteTripButton(Context c) {
+        AlertDialog dialog = new AlertDialog.Builder(c)
+                .setTitle("Are you sure you want to delete this trip?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        _executor.execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                UserEntity userEntity = _userDao.findByEmail(_userEmail);
+                                userEntity.tripIds.remove(_tripEntity.tripid);
+                                _tripDao.delete(_tripEntity);
+                                _userDao.updateUser(userEntity);
+                            }
+                        });
+                        Intent intent = new Intent(TripViewActivity.this, MainActivity.class);
+                        intent.putExtra("EMAIL", _userEmail);
+                        startActivity(intent);
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .create();
+        dialog.show();
+    }
     private void tripDependentInit() {
         RecyclerView locationsList = findViewById(R.id.locations_list_recycler_view);
 

@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private TripDao _tripDao;
     private UserDao _userDao;
     private UserEntity _user;
+    private String _userEmail;
     private Executor _executor = Executors.newSingleThreadExecutor();
     private List<TripEntity> _tripList;
     private List<String> _tripNameList;
@@ -68,15 +69,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        final String email = getIntent().getStringExtra("EMAIL");
+        _userEmail = getIntent().getStringExtra("EMAIL");
         _executor.execute(new Runnable() {
             @Override
             public void run() {
-                UserEntity userEntity = _userDao.findByEmail(email);
+                UserEntity userEntity = _userDao.findByEmail(_userEmail);
                 if (userEntity == null) {
-                    Log.v("New User Email: ", email);
+                    Log.v("New User Email: ", _userEmail);
                     _user = new UserEntity();
-                    _user.email = email;
+                    _user.email = _userEmail;
                     _user.tripIds = new ArrayList<Long>();
                     _executor.execute(new Runnable() {
                         @Override
@@ -86,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         }
                     });
                 } else {
-                    Log.v("User Found: ", email);
+                    Log.v("User Found: ", _userEmail);
                     _user = userEntity;
                     populateTrips(userEntity);
                     final ListView listView = findViewById(R.id.trip_list);
@@ -102,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 Log.v("Clicked on: ", selectedTripName);
                                 Intent intent = new Intent(MainActivity.this, TripViewActivity.class);
                                 intent.putExtra("TRIP ID", _tripList.get(position).tripid);
-
+                                intent.putExtra("EMAIL", _userEmail);
                                 startActivity(intent);
                             }
                         });
@@ -156,6 +157,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                                 Intent intent = new Intent(MainActivity.this, TripViewActivity.class);
                                 intent.putExtra("TRIP ID", tripId);
+                                intent.putExtra("EMAIL", _userEmail);
                                 startActivity(intent);
 
                                 trip.tripid = tripId;
