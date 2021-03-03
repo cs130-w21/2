@@ -16,17 +16,13 @@ import android.widget.Button;
 import android.widget.EditText;
 
 public class EditNoteFragment extends DialogFragment {
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private Button editButton;
     private Button deleteButton;
     private Button cancelButton;
     private Note note;
+    private EditText titleEditText;
+    private EditText noteEditText;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     public EditNoteFragment(Note n) {
         note = n;
@@ -68,6 +64,11 @@ public class EditNoteFragment extends DialogFragment {
         cancelButton = getView().findViewById(R.id.cancel_edit_button);
         deleteButton = getView().findViewById(R.id.delete_note_button);
         editButton = getView().findViewById(R.id.save_edit_button);
+        titleEditText = getView().findViewById(R.id.note_title);
+        noteEditText = getView().findViewById(R.id.note_input_text);
+
+        titleEditText.setText(note.title);
+        noteEditText.setText(note.text);
 
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,14 +90,11 @@ public class EditNoteFragment extends DialogFragment {
             public void onClick(View view) {
 
                 NoteActivity activity = ((NoteActivity) getActivity());
-                activity.deleteNote(note);
 
-                EditText titleEditText = getView().findViewById(R.id.note_title);
                 String titleText = titleEditText.getText().toString();
 
-                EditText noteEditText = getView().findViewById(R.id.note_input_text);
                 String inputText = noteEditText.getText().toString();
-                activity.addNote(new Note(titleText, inputText));
+                activity.updateNote(note, titleText, inputText);
                 dismiss();
             }
         });

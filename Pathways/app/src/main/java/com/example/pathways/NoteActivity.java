@@ -106,8 +106,7 @@ public class NoteActivity extends AppCompatActivity {
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         // To make it fullscreen, use the 'content' root view as the container
         // for the fragment, which is always the root view for the activity
-        transaction.add(android.R.id.content, newFragment)
-                .addToBackStack(null).commit();
+        transaction.add(android.R.id.content, newFragment).commit();
 
     }
     public void showReadDialog(Note note) {
@@ -119,8 +118,7 @@ public class NoteActivity extends AppCompatActivity {
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         // To make it fullscreen, use the 'content' root view as the container
         // for the fragment, which is always the root view for the activity
-        transaction.add(android.R.id.content, newFragment)
-                .addToBackStack(null).commit();
+        transaction.add(android.R.id.content, newFragment).commit();
     }
     public void showEditDialog(Note note) {
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -131,8 +129,7 @@ public class NoteActivity extends AppCompatActivity {
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         // To make it fullscreen, use the 'content' root view as the container
         // for the fragment, which is always the root view for the activity
-        transaction.add(android.R.id.content, newFragment)
-                .addToBackStack(null).commit();
+        transaction.add(android.R.id.content, newFragment).commit();
     }
 
     public void addNote(Note note)
@@ -151,6 +148,7 @@ public class NoteActivity extends AppCompatActivity {
             //add placeId later
             //noteId auto generated here
             Long noteId = _noteDao.createNote(noteEntity);
+            note.id = noteId;
             if(_tripEntity.noteIds == null){
                 _tripEntity.noteIds = new ArrayList<>();
             }
@@ -159,9 +157,27 @@ public class NoteActivity extends AppCompatActivity {
             Log.v("adding", note.title);
         });
     }
-    public void deleteNote(Note note)
-    {
+
+    public void deleteNote(Note note) {
+
         notesAdapter.remove(note);
+        _executor.execute(() -> {
+            _noteDao.deleteNote(_noteDao.findById(note.id));
+            _tripEntity.noteIds.remove(_tripEntity.noteIds.indexOf(note.id));
+            _tripDao.updateTrips(_tripEntity);
+        });
+    }
+
+    public void updateNote(Note note, String title, String text) {
+        note.title = title;
+        note.text = text;
+        notesAdapter.notifyDataSetChanged();
+        _executor.execute(() -> {
+            NoteEntity noteEntity = _noteDao.findById(note.id);
+            noteEntity.text = note.text;
+            noteEntity.title = note.title;
+            _noteDao.updateNote(noteEntity);
+        });
     }
 
     private void addNotesFromNoteIds() {
