@@ -51,7 +51,11 @@ public class ImageViewActivity extends AppCompatActivity {
     private TextView _emptyNotesTextView;
     private TextView _locationTextView;
 
-
+    /**
+     * Initializes necessary components of Image page UI
+     *
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -111,6 +115,9 @@ public class ImageViewActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * fetches image ids from TripEntity fetched from database and then gets the corresponding images
+     */
     private void addImagesFromImageIds() {
         if (_tripEntity.imageIds == null) {
             _tripEntity.imageIds = new ArrayList<>();
@@ -128,6 +135,13 @@ public class ImageViewActivity extends AppCompatActivity {
         _imagesListAdapter.notifyDataSetChanged();
     }
 
+    /**
+     * When selected image is done being fetched, ass image to database
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

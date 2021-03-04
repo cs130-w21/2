@@ -45,6 +45,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private List<String> _tripNameList;
     private FirebaseAuth _auth;
 
+    /**
+     * Initializes all the needed components of the first screen seen upon signing into the app.
+     * This is called automatically by Android when the page is first loaded.
+     *
+     * @param savedInstanceState - Provided by Android
+     *
+     * @return void
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,7 +122,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-
+    /**
+     * Populates member variables _tripNameList and _tripList with the names of trips and the TripEntity
+     * representations of trips respectively.
+     *
+     * @param userEntity - an instance of a UserEntity queried from the Room database
+     *
+     * @return void
+     */
     private void populateTrips(UserEntity userEntity) {
         if (userEntity == null || userEntity.tripIds == null) {
             Log.e("populateTrips: ", "User null");
@@ -136,6 +151,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    /**
+     * Creates the pop up dialog box that allows the user to name their trip. Once given a name, it will create a new
+     * trip in the Room database, then insert the corresponding trip id to the user's list of tip ids. Will navigate
+     * to the TripViewActivity and pass the trip id and user email.
+     *
+     * @param c - Android activity context
+     *
+     * @return void
+     */
     private void createTripDialog(Context c) {
         //Found online, credit to Alvin Alexander
         final EditText taskEditText = new EditText(c);
@@ -182,7 +206,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dialog.show();
     }
 
-
+    /**
+     * Populates the search functionality with trip names. Called by Android to handle search bar functionality
+     *
+     * @param menu
+     *
+     * @return - always returns true
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -209,6 +239,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return true;
     }
 
+    /**
+     * Signs the user out when User clicks the logout button
+     *
+     * @param item - the button that was clicked
+     *
+     * @return the return value of the super class's method that this is overriding
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will

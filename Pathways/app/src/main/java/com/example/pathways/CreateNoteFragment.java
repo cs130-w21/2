@@ -19,7 +19,9 @@ public class CreateNoteFragment extends DialogFragment {
     private Button createButton;
     private Button cancelButton;
 
-
+    /**
+     * Initialize note fragment UI
+     */
     @Override
     public void onStart() {
         super.onStart();
@@ -31,8 +33,15 @@ public class CreateNoteFragment extends DialogFragment {
         }
     }
 
-    /** The system calls this to get the DialogFragment's layout, regardless
-     of whether it's being displayed as a dialog or an embedded fragment. */
+    /**
+     * The system calls this to get the DialogFragment's layout, regardless
+     * of whether it's being displayed as a dialog or an embedded fragment.
+     *
+     * @param inflater - Android tool for visualizing views
+     * @param container - container of notes
+     * @param savedInstanceState - Android specific object
+     * @return a completed view to display
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -41,7 +50,11 @@ public class CreateNoteFragment extends DialogFragment {
     }
 
 
-    /** The system calls this only when creating the layout in a dialog. */
+    /**
+     * The system calls this only when creating the layout in a dialog.
+     * @param savedInstanceState - Android specific object
+     * @return Dialog window
+     */
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // The only reason you might override this method when using onCreateView() is
@@ -53,6 +66,12 @@ public class CreateNoteFragment extends DialogFragment {
         return dialog;
     }
 
+    /**
+     * Initializes button to navigate from fragment
+     *
+     * @param view - View to be displayed
+     * @param savedInstanceState - Android specific object
+     */
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         createButton = getView().findViewById(R.id.create_note_button);
