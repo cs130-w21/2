@@ -148,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     public void onClick(DialogInterface dialog, int which) {
                         String trip_name = String.valueOf(taskEditText.getText());
                         final TripEntity trip = new TripEntity();
-                        trip.tripName = trip_name;
+                        trip.tripName = trip_name.trim();
                         _executor.execute(new Runnable() {
                             @Override
                             public void run() {

@@ -80,6 +80,7 @@ public class ImageViewActivity extends AppCompatActivity {
         _executor.execute(() -> {
             TripEntity tripEntity = _tripDao.findByID(tripId);
             _tripEntity = tripEntity;
+            getSupportActionBar().setTitle(_tripEntity.tripName + " Gallery");
 
             addImagesFromImageIds();
         });
