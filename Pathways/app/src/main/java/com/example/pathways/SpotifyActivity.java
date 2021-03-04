@@ -426,7 +426,7 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
     }
 
     /**
-     * Authenticates User in Spotify and then uses Spotify api to interact with accound
+     * Authenticates User in Spotify and then uses Spotify api to interact with account
      * @param requestCode
      * @param resultCode
      * @param intent

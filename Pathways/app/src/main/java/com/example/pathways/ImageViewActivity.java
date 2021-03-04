@@ -136,7 +136,7 @@ public class ImageViewActivity extends AppCompatActivity {
     }
 
     /**
-     * When selected image is done being fetched, ass image to database
+     * When selected image is done being fetched, add image to database
      *
      * @param requestCode
      * @param resultCode
