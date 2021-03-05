@@ -6,7 +6,7 @@ dist: xenial
 # ensure cache isn't always uploaded
 before_cache:
  - rm -f $HOME/Pathways/.gradle/caches/modules-2/modules-2.lock
- - rm -fr $HOME/Pathways/.gradle/caches/*/plugin-resolution/
+ - rm -fr $HOME/Pathways/.gradle/caches/*/plugin-resolution/ 
 
 cache:
  directories:
