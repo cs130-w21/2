@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/quantum_white_100"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:orientation="vertical"
+        android:layout_marginLeft="8dp"
+        >
+
+        <TextView
+            android:id="@+id/noteTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dip"
+            android:layout_marginBottom="0dp"
+            android:text="Title"
+            android:textSize="40dip"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/noteDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/noteTitle"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="0dp"
+            android:padding="6dip"
+            android:text="Date"
+            android:textSize="20dip"
+            android:textStyle="italic"/>
+
+        <TextView
+            android:id="@+id/noteLocation"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/noteDate"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="0dp"
+            android:padding="6dip"
+            android:text="Location"
+            android:textSize="18dip"
+            android:textStyle="italic"/>
+
+        <TextView
+            android:id="@+id/noteContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/edit_note_button"
+            android:layout_below="@+id/noteLocation"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="0dp"
+            android:padding="6dip"
+            android:text="Content"
+            android:textSize="20dip" />
+
+        <Button
+            android:id="@+id/edit_note_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/cancel_read_button"
+            android:layout_marginBottom="0dp"
+            android:text="Edit Note"
+            app:layout_anchor="@+id/frameLayout"
+            app:layout_anchorGravity="center" />
+
+        <Button
+            android:id="@+id/cancel_read_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="0dp"
+            android:text="Cancel"
+            app:layout_anchor="@+id/frameLayout"
+            app:layout_anchorGravity="center" />
+    </RelativeLayout>
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

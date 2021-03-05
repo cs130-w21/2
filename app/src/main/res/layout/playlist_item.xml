@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:id="@+id/layout_playlist_item"
+    android:background="@color/quantum_white_100"
+    >
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_margin="10dp"
+        android:id="@+id/playlist_item_horizontal_layout"
+        android:orientation="horizontal"
+        >
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/reorder_song_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scaleX=".8"
+            android:scaleY=".8"
+            app:srcCompat="@drawable/ic_baseline_reorder_36"
+            android:layout_marginRight="12dp"
+            android:layout_marginLeft="8dp"
+            android:background="@android:color/white"
+            android:layout_gravity="center_vertical"
+            />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/album_art"
+            android:layout_width="62dp"
+            android:layout_height="62dp"
+            android:maxWidth="64dp"
+            android:gravity="start"
+            android:layout_marginRight="16dp"
+            android:background="@drawable/border"
+            android:padding="2dp"
+            android:cropToPadding="true"
+            />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="center_vertical"
+            >
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/text_view_tack_name"
+                    android:layout_width="170dp"
+                    android:layout_height="wrap_content"
+                    android:text="Name"
+                    android:textAlignment="textStart"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:gravity="start"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/text_view_artist_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Address"
+                android:textAlignment="textStart"
+                android:textSize="12sp"
+                android:maxWidth="120dp"
+                android:gravity="start" />
+
+            <TextView
+                android:id="@+id/text_view_album_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Rating"
+                android:textAlignment="textStart"
+                android:textSize="12sp"
+                android:maxWidth="120dp"
+                android:gravity="start" />
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/delete_song_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleX=".8"
+        android:scaleY=".8"
+        app:srcCompat="@drawable/ic_baseline_remove_circle_outline_36"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="18dp"
+        android:background="@android:color/white"
+        />
+
+</RelativeLayout>

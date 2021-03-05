@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<!--<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".EditNoteFragment">-->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+        //android:text="@string/hello_blank_fragment" />
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/quantum_white_100"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:orientation="vertical">
+        <EditText
+            android:id="@+id/note_title"
+            android:hint="Title"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text" />
+        <EditText
+            android:id="@+id/note_input_text"
+            android:hint="Edit journal text here"
+            android:layout_width="fill_parent"
+            android:layout_height="400dp"
+            android:inputType="textMultiLine"
+            android:lines="12"
+            android:scrollbars="vertical" />
+        <Button
+            android:id="@+id/save_edit_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save Edit"
+            app:layout_anchor="@+id/frameLayout"
+            app:layout_anchorGravity="center" />
+        <Button
+            android:id="@+id/delete_note_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Delete"
+            app:layout_anchor="@+id/frameLayout"
+            app:layout_anchorGravity="center" />
+        <Button
+            android:id="@+id/cancel_edit_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            app:layout_anchor="@+id/frameLayout"
+            app:layout_anchorGravity="center" />
+
+    </LinearLayout>
+
+<!--
+</FrameLayout>-->
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

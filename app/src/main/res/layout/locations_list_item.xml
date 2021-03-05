@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:id="@+id/layout_locations_list_item">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:id="@+id/list_item_horizontal_layout"
+        android:orientation="horizontal"
+        >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/text_view_stop_name"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:text="Name"
+                    android:textAlignment="textStart"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:gravity="start" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/text_view_stop_address"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Address"
+                android:textAlignment="textStart"
+                android:textSize="14sp"
+                android:maxWidth="305dp"
+                android:gravity="start" />
+
+            <TextView
+                android:id="@+id/text_view_rating"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Rating"
+                android:textAlignment="textStart"
+                android:textSize="14sp"
+                android:gravity="start" />
+
+            <TextView
+                android:id="@+id/text_view_duration"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Duration"
+                android:textAlignment="textStart"
+                android:textSize="14sp"
+                android:gravity="start" />
+
+            <TextView
+                android:id="@+id/text_view_stop_type"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Type"
+                android:textAlignment="textStart"
+                android:textSize="14sp"
+                android:textStyle="italic"
+                android:visibility="gone"
+                android:gravity="start" />
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="52dp"
+        >
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/add_image_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scaleX=".8"
+            android:scaleY=".8"
+            app:srcCompat="@drawable/ic_baseline_add_a_photo_36"
+            android:tint="@color/quantum_black_100"
+            android:background="@android:color/white"
+            />
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/add_note_button"
+            android:layout_marginLeft="8dp"
+            android:scaleX=".8"
+            android:scaleY=".8"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_baseline_note_add_36"
+            android:tint="@color/quantum_black_100"
+            android:background="@android:color/white"
+            />
+
+
+
+    </LinearLayout>
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/delete_stop_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/ic_baseline_remove_circle_outline_36"
+        android:scaleX=".75"
+        android:scaleY=".75"
+        android:visibility="gone"
+        android:background="@android:color/white"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        />
+    
+</RelativeLayout>
