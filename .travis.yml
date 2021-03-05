@@ -38,7 +38,7 @@ before_install:
 - chmod +x gradlew
 
 script:
-  -./gradlew build
+  - ./gradlew build
 
 # Emulator Management: Create, Start and Wait
 #before_script:
