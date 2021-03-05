@@ -39,6 +39,7 @@ before_install:
 
 script:
   - ./gradlew build
+  - ./gradlew test
 
 # Emulator Management: Create, Start and Wait
 #before_script:
