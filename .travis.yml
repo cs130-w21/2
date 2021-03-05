@@ -33,6 +33,9 @@ cache:
     - $HOME/.gradle/wrapper/
     - $HOME/.android/build-cache
 
+before_install:
+- chmod +x gradlew
+
 # Emulator Management: Create, Start and Wait
 #before_script:
 #  - echo no | android create avd --force -n test -t android-29 --abi armeabi-v7a -c 100M
