@@ -34,8 +34,8 @@ cache:
     - $HOME/.android/build-cache
 
 before_install:
-  - cd Pathways
-  - chmod +x gradlew
+- chmod +x gradlew
+- cd Pathways
 
 script:
   -./gradlew build
