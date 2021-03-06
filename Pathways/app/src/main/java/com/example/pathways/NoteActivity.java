@@ -34,7 +34,8 @@ public class NoteActivity extends AppCompatActivity {
     private ArrayList<Note> notes = new ArrayList<>();
     private String _placeId = "";
     private String _locationName = "";
-    private TextView _locationTextView;
+    @VisibleForTesting
+    TextView _locationTextView;
     @VisibleForTesting
     TextView _emptyNotesTextView;
 
@@ -158,14 +159,9 @@ public class NoteActivity extends AppCompatActivity {
         note.text = text;
         notesAdapter.notifyDataSetChanged();
     }
-
     @VisibleForTesting
-    public long addNote(Note note)
+    public void addNotetoDb(Note note)
     {
-        _emptyNotesTextView.setVisibility(View.GONE);
-        addNoteToView(note);
-
-        //add note to database
         _executor.execute(() -> {
             NoteEntity noteEntity = new NoteEntity();
             noteEntity.date = note.created;
@@ -184,7 +180,15 @@ public class NoteActivity extends AppCompatActivity {
             _tripDao.updateTrips(_tripEntity);
             Log.v("adding", note.title);
         });
-        return note.id;
+    }
+    @VisibleForTesting
+    public void addNote(Note note)
+    {
+        _emptyNotesTextView.setVisibility(View.GONE);
+        addNoteToView(note);
+
+        //add note to database
+        addNotetoDb(note);
     }
 
     public long deleteNote(Note note) {

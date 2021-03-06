@@ -6,13 +6,21 @@ import android.view.View;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
+import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.MockitoRule;
+import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 import android.widget.TextView;
+import android.view.View;
+import static org.mockito.Mockito.when;
+
+
 
 
 import java.util.ArrayList;
@@ -20,10 +28,12 @@ import java.util.ArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NotesActivityUnitTest {
     private NoteActivity activity;
+    private Context test;
 
     @Mock
     Context mockContext;
@@ -33,6 +43,7 @@ public class NotesActivityUnitTest {
 
     @Mock
     NoteDao mockNoteDao;
+    private TextView textView;
 
     @Before
     public void initAll() {
@@ -59,23 +70,24 @@ public class NotesActivityUnitTest {
 
         assertTrue("Note note added to notesAdapter in addNote() call", addedNotes.contains(testNote));
     }
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule().strictness(Strictness.LENIENT);
     @Test
-    public void testAddNoteToDb(){
+    public void testAddNote(){
 
-//        Note testNote = new Note("db_test title", "db_test text");
-//      //  TextView _emptyNotesTextView = null;
-//
-//        //_emptyNotesTextView.setVisibility(View.GONE);
-//        activity.InitemptyNotes();
-//        long id_check = activity.addNote(testNote);
-//
-//        NoteEntity note_check = mockNoteDao.findById(id_check);
-//        Assert.assertEquals(testNote.title,note_check.title);
-
-
+        Note testNote = new Note("db_test title", "db_test text");
+       // activity._emptyNotesTextView = new TextView(mockContext);
+        activity.addNotetoDb(testNote);
+        NoteEntity note_ent = new NoteEntity();
+        when(mockNoteDao.createNote(note_ent)).thenReturn(0l);
+        //activity.addNote(note_ent);
+       // doNothing().when(mockNoteDao).updateUser(user);
+        //NoteEntity note_check = mockNoteDao.findById(id_check);
+        Assert.assertEquals(testNote.id, 0l);
     }
 
-//    @Test
+
+    //    @Test
 //    public void testDeleteNoteFromDb(){
 //        Note testNote = new Note("db_test title", "db_test text");
 //        activity.addNote(testNote);
