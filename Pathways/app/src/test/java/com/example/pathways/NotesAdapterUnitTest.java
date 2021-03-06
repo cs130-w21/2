@@ -40,7 +40,7 @@ public class NotesAdapterUnitTest {
     public void testAddNote() {
         Note testNote = new Note("test title", "test text");
 
-        ArrayList<Note> addedNotes = new ArrayList<Note>;
+        ArrayList<Note> addedNotes = new ArrayList<Note>();
 
         doAnswer(new Answer<Void>() {
              @Override
@@ -49,6 +49,8 @@ public class NotesAdapterUnitTest {
                  return null;
              }
          }).when(mockAdapter).add(testNote);
+
+        activity.addNoteToView(testNote);
 
         assertTrue("Note note added to notesAdapter in addNote() call", addedNotes.contains(testNote));
     }
