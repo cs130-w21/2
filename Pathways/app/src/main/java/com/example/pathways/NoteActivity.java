@@ -26,7 +26,8 @@ public class NoteActivity extends AppCompatActivity {
     private Long tripId;
 
     private AppDatabase _db;
-    private NoteDao _noteDao;
+    @VisibleForTesting
+    NoteDao _noteDao;
     private TripDao _tripDao;
     private TripEntity _tripEntity;
     private Executor _executor = Executors.newSingleThreadExecutor();
@@ -137,6 +138,12 @@ public class NoteActivity extends AppCompatActivity {
     void addNoteToView(Note note) {
         note.location = _locationName;
         notesAdapter.add(note);
+    }
+
+    @VisibleForTesting
+    void deleteNoteFromView(Note note)
+    {
+        notesAdapter.remove(note);
     }
 
     public void addNote(Note note)
