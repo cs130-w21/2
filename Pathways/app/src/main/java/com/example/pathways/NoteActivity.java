@@ -132,11 +132,12 @@ public class NoteActivity extends AppCompatActivity {
         transaction.add(android.R.id.content, newFragment).commit();
     }
 
-    public void addNote(Note note)
+    public long addNote(Note note)
     {
         _emptyNotesTextView.setVisibility(View.GONE);
         note.location = _locationName;
         notesAdapter.add(note);
+
         //add note to database
         _executor.execute(() -> {
             NoteEntity noteEntity = new NoteEntity();
@@ -156,6 +157,7 @@ public class NoteActivity extends AppCompatActivity {
             _tripDao.updateTrips(_tripEntity);
             Log.v("adding", note.title);
         });
+        return note.id;
     }
 
     public void deleteNote(Note note) {
