@@ -44,6 +44,12 @@ public class LocationsListAdapter extends RecyclerView.Adapter<LocationsListAdap
         return new LocationsListAdapter.ViewHolder(view, _callbacks);
     }
 
+    /**
+     * Populates list of locations on trip page
+     *
+     * @param holder - Container for locations
+     * @param position - Position of location in location list
+     */
     @Override
     public void onBindViewHolder(@NonNull LocationsListAdapter.ViewHolder holder, int position) {
         Location location = _locations.get(position);
@@ -123,6 +129,11 @@ public class LocationsListAdapter extends RecyclerView.Adapter<LocationsListAdap
             _adapterCallbacks = adapterCallbacks;
         }
 
+        /**
+         * Handles clicking of location
+         *
+         * @param view - View that was clicked on
+         */
         @Override
         public void onClick(View view) {
             if (view.getId() == R.id.delete_stop_button) {

@@ -60,6 +60,11 @@ public class ReadNoteFragment extends DialogFragment {
         return dialog;
     }
 
+    /**
+     * Initializes Note viewing UI
+     * @param view
+     * @param savedInstanceState
+     */
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         cancelButton = getView().findViewById(R.id.cancel_read_button);

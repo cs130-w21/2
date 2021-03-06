@@ -35,7 +35,11 @@ public class NoteActivity extends AppCompatActivity {
     private TextView _locationTextView;
     private TextView _emptyNotesTextView;
 
-
+    /**
+     * Initializes necessary UI components of Note page
+     *
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,7 +100,10 @@ public class NoteActivity extends AppCompatActivity {
         listView.setAdapter(notesAdapter);
     }
 
-    // Reference: https://developer.android.com/guide/topics/ui/dialogs#FullscreenDialog
+    /**
+     * Show Note creation dialog box
+     * Reference: https://developer.android.com/guide/topics/ui/dialogs#FullscreenDialog
+     */
     public void showCreateDialog() {
         FragmentManager fragmentManager = getSupportFragmentManager();
         CreateNoteFragment newFragment = new CreateNoteFragment();
@@ -109,6 +116,10 @@ public class NoteActivity extends AppCompatActivity {
         transaction.add(android.R.id.content, newFragment).commit();
 
     }
+    /**
+     * Show Note reading dialog box
+     * Reference: https://developer.android.com/guide/topics/ui/dialogs#FullscreenDialog
+     */
     public void showReadDialog(Note note) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         ReadNoteFragment newFragment = new ReadNoteFragment(note);
@@ -120,6 +131,12 @@ public class NoteActivity extends AppCompatActivity {
         // for the fragment, which is always the root view for the activity
         transaction.add(android.R.id.content, newFragment).commit();
     }
+
+    /**
+     * Show note editing dialog box
+     * Reference: https://developer.android.com/guide/topics/ui/dialogs#FullscreenDialog
+     * @param note - Note to be edited
+     */
     public void showEditDialog(Note note) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         EditNoteFragment newFragment = new EditNoteFragment(note);
@@ -132,6 +149,10 @@ public class NoteActivity extends AppCompatActivity {
         transaction.add(android.R.id.content, newFragment).commit();
     }
 
+    /**
+     * Add given note to database
+     * @param note - Note to be added
+     */
     public void addNote(Note note)
     {
         _emptyNotesTextView.setVisibility(View.GONE);
@@ -158,6 +179,11 @@ public class NoteActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Removes note from database
+     *
+     * @param note - Note to be deleted
+     */
     public void deleteNote(Note note) {
 
         notesAdapter.remove(note);
@@ -168,6 +194,13 @@ public class NoteActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Updates Note in database
+     *
+     * @param note - Note to be updated
+     * @param title - New title for note
+     * @param text - New text for note
+     */
     public void updateNote(Note note, String title, String text) {
         note.title = title;
         note.text = text;
@@ -180,6 +213,9 @@ public class NoteActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Populate notes from NoteIds in database
+     */
     private void addNotesFromNoteIds() {
         NoteEntity noteEntity;
         if(_tripEntity.noteIds == null){

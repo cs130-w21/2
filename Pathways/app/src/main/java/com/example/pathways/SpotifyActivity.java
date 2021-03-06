@@ -110,7 +110,10 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
         }
     }
 
-
+    /**
+     * Initializes UI components of Spotify Page
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -186,6 +189,9 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
         });
     }
 
+    /**
+     * Initializes playlist specific to designated trip
+     */
     private void tripDependentInit () {
         getSupportActionBar().setTitle(_tripEntity.tripName + " Playlist");
         if (_tripEntity.songInfos != null) {
@@ -201,7 +207,11 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
     }
 
 
-
+    /**
+     * Handles searching for and adding songs to playlist using Spotify api
+     * @param menu
+     * @return
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
@@ -307,6 +317,12 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
         return true;
     }
 
+    /**
+     * Attempts to search Spotify for a given song
+     * @param newText - Text to query Spotify with
+     * @param suggestionAdapter
+     * @return True or False depending on success of search
+     */
     private boolean attemptSearch(String newText, CursorAdapter suggestionAdapter) {
         // Debounce query
         if (System.currentTimeMillis() - searchQueryTimeStamp < SEARCH_DEBOUNCE_TIME) {
@@ -353,6 +369,10 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
         return false;
     }
 
+    /**
+     * Play clicked song from Spotify
+     * @param resume - Boolean determining if the song is resuming or not
+     */
     private void play(boolean resume) {
         if (_songInfos.size() == 0) {
             return;
@@ -405,6 +425,12 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
         SpotifyAppRemote.disconnect(_spotifyAppRemote);
     }
 
+    /**
+     * Authenticates User in Spotify and then uses Spotify api to interact with account
+     * @param requestCode
+     * @param resultCode
+     * @param intent
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
@@ -473,9 +499,12 @@ public class SpotifyActivity extends AppCompatActivity implements PlaylistAdapte
         }
     }
 
+    /**
+     * Handles when song is deleted from playlist
+     * @param index
+     */
     @Override
     public void onSongDeleted(int index) {
-        Log.v("WTF", index + "");
         if (index <= _currentSongIndex) {
             _currentSongIndex -= 1;
             Log.v("DELETE", "i: " + index + ", cSI: " + _currentSongIndex);
