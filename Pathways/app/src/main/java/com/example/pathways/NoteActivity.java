@@ -35,9 +35,14 @@ public class NoteActivity extends AppCompatActivity {
     private String _placeId = "";
     private String _locationName = "";
     private TextView _locationTextView;
-    private TextView _emptyNotesTextView;
+    @VisibleForTesting
+    TextView _emptyNotesTextView;
 
-
+//    @VisibleForTesting
+//    void InitemptyNotes()
+//    {
+//        _emptyNotesTextView = findViewById(R.id.empty_notes_text);
+//    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,8 +63,8 @@ public class NoteActivity extends AppCompatActivity {
             }
         });
 
-        _emptyNotesTextView = findViewById(R.id.empty_notes_text);
 
+        _emptyNotesTextView = findViewById(R.id.empty_notes_text);
 
         tripId = getIntent().getLongExtra("TRIP ID", 0);
 
@@ -146,10 +151,18 @@ public class NoteActivity extends AppCompatActivity {
         notesAdapter.remove(note);
     }
 
-    public void addNote(Note note)
+    @VisibleForTesting
+    void updateNoteInView(Note note, String title, String text)
+    {
+        note.title = title;
+        note.text = text;
+        notesAdapter.notifyDataSetChanged();
+    }
+
+    @VisibleForTesting
+    public long addNote(Note note)
     {
         _emptyNotesTextView.setVisibility(View.GONE);
-
         addNoteToView(note);
 
         //add note to database
@@ -171,22 +184,26 @@ public class NoteActivity extends AppCompatActivity {
             _tripDao.updateTrips(_tripEntity);
             Log.v("adding", note.title);
         });
+        return note.id;
     }
 
-    public void deleteNote(Note note) {
+    public long deleteNote(Note note) {
 
-        notesAdapter.remove(note);
+        //notesAdapter.remove(note);
+        deleteNoteFromView(note);
         _executor.execute(() -> {
             _noteDao.deleteNote(_noteDao.findById(note.id));
             _tripEntity.noteIds.remove(_tripEntity.noteIds.indexOf(note.id));
             _tripDao.updateTrips(_tripEntity);
         });
+        return note.id;
     }
 
     public void updateNote(Note note, String title, String text) {
-        note.title = title;
-        note.text = text;
-        notesAdapter.notifyDataSetChanged();
+//        note.title = title;
+//        note.text = text;
+//        notesAdapter.notifyDataSetChanged();
+        updateNoteInView(note,title,text);
         _executor.execute(() -> {
             NoteEntity noteEntity = _noteDao.findById(note.id);
             noteEntity.text = note.text;
