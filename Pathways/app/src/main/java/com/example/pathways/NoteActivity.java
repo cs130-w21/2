@@ -5,6 +5,7 @@ import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import androidx.annotation.RequiresPermission;
+import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -149,6 +150,12 @@ public class NoteActivity extends AppCompatActivity {
         transaction.add(android.R.id.content, newFragment).commit();
     }
 
+    @VisibleForTesting
+    void addNoteToView(Note note) {
+        note.location = _locationName;
+        notesAdapter.add(note);
+    }
+
     /**
      * Add given note to database
      * @param note - Note to be added
@@ -156,8 +163,9 @@ public class NoteActivity extends AppCompatActivity {
     public void addNote(Note note)
     {
         _emptyNotesTextView.setVisibility(View.GONE);
-        note.location = _locationName;
-        notesAdapter.add(note);
+
+        addNoteToView(note);
+
         //add note to database
         _executor.execute(() -> {
             NoteEntity noteEntity = new NoteEntity();

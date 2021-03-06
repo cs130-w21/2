@@ -9,6 +9,7 @@ import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 
+import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -36,13 +37,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     FloatingActionButton _tripFab;
     ArrayAdapter<String> _arrayAdapter;
     private AppDatabase _db;
-    private TripDao _tripDao;
-    private UserDao _userDao;
-    private UserEntity _user;
+    @VisibleForTesting TripDao _tripDao;
+    @VisibleForTesting UserDao _userDao;
+    @VisibleForTesting UserEntity _user;
     private String _userEmail;
     private Executor _executor = Executors.newSingleThreadExecutor();
-    private List<TripEntity> _tripList;
-    private List<String> _tripNameList;
+    @VisibleForTesting List<TripEntity> _tripList;
+    @VisibleForTesting List<String> _tripNameList;
     private FirebaseAuth _auth;
 
     /**
@@ -122,15 +123,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-    /**
-     * Populates member variables _tripNameList and _tripList with the names of trips and the TripEntity
-     * representations of trips respectively.
-     *
-     * @param userEntity - an instance of a UserEntity queried from the Room database
-     *
-     * @return void
-     */
-    private void populateTrips(UserEntity userEntity) {
+  /**
+   * Populates member variables _tripNameList and _tripList with the names of trips and the TripEntity
+   * representations of trips respectively.
+   *
+   * @param userEntity - an instance of a UserEntity queried from the Room database
+   *
+   * @return void
+   */
+  @VisibleForTesting
+    void populateTrips(UserEntity userEntity) {
         if (userEntity == null || userEntity.tripIds == null) {
             Log.e("populateTrips: ", "User null");
             return;
@@ -149,6 +151,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     runOnUiThread(() -> _arrayAdapter.notifyDataSetChanged());
                 }});
         }
+    }
+
+    @VisibleForTesting
+    void createTrip(TripEntity trip) {
+        //Log.v("Inserting trip: ", trip.tripName);
+        Long tripId = _tripDao.insert(trip);
+
+        Intent intent = new Intent(MainActivity.this, TripViewActivity.class);
+        intent.putExtra("TRIP ID", tripId);
+        intent.putExtra("EMAIL", _userEmail);
+        startActivity(intent);
+
+        trip.tripid = tripId;
+        _tripList.add(trip);
+        _tripNameList.add(trip.tripName);
+
+        runOnUiThread(() -> _arrayAdapter.notifyDataSetChanged());
+
+        if (_user.tripIds == null) {
+            _user.tripIds = new ArrayList<Long>();
+        }
+        _user.tripIds.add(tripId);
+        _userDao.updateUser(_user);
+
     }
 
     /**
@@ -176,26 +202,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         _executor.execute(new Runnable() {
                             @Override
                             public void run() {
-                                Log.v("Inserting trip: ", trip.tripName);
-                                Long tripId = _tripDao.insert(trip);
-
-                                Intent intent = new Intent(MainActivity.this, TripViewActivity.class);
-                                intent.putExtra("TRIP ID", tripId);
-                                intent.putExtra("EMAIL", _userEmail);
-                                startActivity(intent);
-
-                                trip.tripid = tripId;
-                                _tripList.add(trip);
-                                _tripNameList.add(trip.tripName);
-
-                                runOnUiThread(() -> _arrayAdapter.notifyDataSetChanged());
-
-                                if (_user.tripIds == null) {
-                                    _user.tripIds = new ArrayList<Long>();
-                                }
-                                _user.tripIds.add(tripId);
-                                _userDao.updateUser(_user);
-
+                                createTrip(trip);
                             }
                         });
 
