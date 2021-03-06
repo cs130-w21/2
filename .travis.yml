@@ -1,6 +1,5 @@
 language: android
 dist: trusty
-
 android:
   components:
     # Uncomment the lines below if you want to
@@ -22,31 +21,29 @@ android:
     # Specify at least one system image,
     # if you need to run emulator(s) during your tests
     #- sys-img-x86-android-29
-    - sys-img-armeabi-v7a-android-29
-
+    #- sys-img-armeabi-v7a-android-29
 before_cache:
-  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
-  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
 cache:
   directories:
-    - $HOME/.gradle/caches/
-    - $HOME/.gradle/wrapper/
-    - $HOME/.android/build-cache
-
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
+  - "$HOME/.android/build-cache"
 before_install:
+- openssl aes-256-cbc -K $encrypted_c80f59e584b7_key -iv $encrypted_c80f59e584b7_iv
+  -in keystore.jks.enc -out keystore.jks -d
 - cd Pathways
 - chmod +x gradlew
-
 script:
-  - ./gradlew build
-  - ./gradlew test
-
-# Emulator Management: Create, Start and Wait
-#before_script:
-#  - echo no | android create avd --force -n test -t android-29 --abi armeabi-v7a -c 100M
-#  - emulator -avd test -no-audio -no-window &
-#  - android-wait-for-emulator
-#  - adb shell input keyevent 82 &
-
-#script:
-#   - ./gradlew build checkstyle connectedCheck -PdisablePreDex
+- "./gradlew build"
+#- "./gradlew test"
+deploy:
+  provider: releases
+  api_key:
+    secure: sbSl+4aeE1lUFRYqoINi+8UyQvqR5TwunSNAEKEid+BZ9y1Xj3yXUDtU1XyAadaQqfZBlTJdDVtvY/xeP/Z9aaLRwuIqZk2Y9zHfrlxCFD8es01Yg6z0tC2t8IaxxJfGCChm8ZIOjIIBhmJTIusxkdDeo6OGZ/U7qmdgOHlIYjV2rBd7bPwZ//RUmQWbPnSKJxV8jcJv4/QDUqI6oiyv5PfWuuJk8ffPNiLMN1lyh1xuDLixu+skOYc2jKAkcy2HGElwzyC2Gc7QcdEXHdJXn+QiEHNtHKeta2RqO2O2Y9TBmbyLR0dSTaeXsJp3xMUyFD+IBERwOe244wRg5VNCYglqoobfjerB3ZcBm48WfLQeZ+7LELmzcs/EsYWm+2IXIib2NbLfXQhy4bHz9V30Xmw6dgKzAk+q8Ewt7Dyp3rT9qblPqQ9qOSkIzUbXZhv6hbgz3DBtZ9FPBkqA3KJNWaqkAz4ytVBM5uu1Itc61uFOe48v9YXNEG7lolgiwI+SS4F9BREy3xL01ux3kk/4c4ojkQT7J3I/JxNAW8e/9fwJggS8yGLs11232kxjfBlImtdDp71KeyDrL4BHyqy6UnssSUXtFLMQweDYCRnP1MaLtZBILfrNFRxd9i12llFhnzz2J7D/F4SX16I6x9iZ+r+BXWYSDqXanX7y4Ai6Knw=
+  file: "pathways.apk"
+  skip_cleanup: true
+  on:
+    tags: true
+    all_branches: true
