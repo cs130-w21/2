@@ -9,7 +9,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.gms.common.api.Status;
@@ -86,6 +85,12 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
     // Database entity
     private TripEntity _tripEntity;
 
+    /**
+     * Initializes  all the necessary components of the central page where a user can interact with their trips.
+     * Called Automatically by Android when loading the Trips page
+     *
+     * @param savedInstanceState - Provided by Android
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -182,12 +187,17 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         _deleteTripButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                deleteTripButton(TripViewActivity.this);
+                deleteTripDialog(TripViewActivity.this);
             }
         });
     }
 
-    private void deleteTripButton(Context c) {
+    /**
+     * Creates the pop up dialog that ensures a user intends to delete one of their trips
+     *
+     * @param c - Android activity context
+     */
+    private void deleteTripDialog(Context c) {
         AlertDialog dialog = new AlertDialog.Builder(c)
                 .setTitle("Are you sure you want to delete this trip?")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -211,6 +221,10 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
                 .create();
         dialog.show();
     }
+
+    /**
+     * Initializes the trips page components that need information specific to a designated trip.
+     */
     private void tripDependentInit() {
         RecyclerView locationsList = findViewById(R.id.locations_list_recycler_view);
 
@@ -273,6 +287,14 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         });
     }
 
+    /**
+     * Interacts with Google places api to find a place and then store it in the database and
+     * show it on the map.
+     *
+     * @param place - Google places proprietary place class
+     * @param locationType - enum specifying start end or middle of trip
+     * @param createRoute - Boolean determining if a route should be created
+     */
     private void addPlaceToMapAndTrip(Place place, LocationType locationType, boolean createRoute) {
         MarkerOptions markerOptions =
                 new MarkerOptions().position(place.getLatLng()).title(place.getName());
@@ -320,7 +342,9 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         }
     }
 
-
+    /**
+     * Calls google maps api to create a route on screen
+     */
     private void createRoute() {
         if (_trip.getNumLocations() <= 1) {
             return;
@@ -396,6 +420,9 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         });
     }
 
+    /**
+     * Creates a new Trip from the current TripEntity. Then updates the map based on information from Trip
+     */
     private void generateTripFromTripEntity() {
         _trip = new Trip(_tripEntity.tripName);
 
@@ -423,8 +450,10 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
 
     }
 
-    // Will only update places once all places are retrieved.
-    // This is necessary because fetching places by placeid is async obviously.
+    /**
+     * Will only update places once all places are retrieved.
+     * his is necessary because fetching places by placeid is async obviously.
+     */
     private void attemptToUpdateMapAndTrip() {
         if (_tripEntity.placeIds.size() != 0 && _tripEntity.placeIds.size() == _tempPlaces.size()) {
             // Reorder the places so the destination is second for addPlaceTMT()
@@ -458,6 +487,11 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         _map = googleMap;
     }
 
+    /**
+     * When a stop is deleted, this removes it from the database and updates the map
+     *
+     * @param placeId - the google place id of a given location
+     */
     @Override
     public void onStopDeleted(String placeId) {
         _trip.removeLocation(placeId);
@@ -476,6 +510,9 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         createRoute();
     }
 
+    /**
+     * Makes all action buttons visible
+     */
     private void showFABMenu() {
         _isFabOpen = true;
         _imageFab.animate().translationY(getResources().getDimension(R.dimen.standard_60));
@@ -483,6 +520,9 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         _musicFab.animate().translationY(getResources().getDimension(R.dimen.standard_180));
     }
 
+    /**
+     * Hides action buttons
+     */
     private void closeFABMenu() {
         _isFabOpen = false;
         _imageFab.animate().translationY(0);
@@ -490,6 +530,11 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         _musicFab.animate().translationY(0);
     }
 
+    /**
+     * Adjusts map to look at a clicked place
+     *
+     * @param placeId - the google place id of a given location
+     */
     @Override
     public void onItemClicked(String placeId) {
         Marker marker = _markerMap.get(placeId);
@@ -499,6 +544,11 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         _map.moveCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 5));
     }
 
+    /**
+     * Adds a note to a given location
+     * @param placeId - the google place id of a given location
+     * @param locationName - name of the location that is being associated with a note
+     */
     @Override
     public void addNoteForLocation(String placeId, String locationName) {
         Intent intent = new Intent(TripViewActivity.this, NoteActivity.class);
@@ -507,6 +557,11 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         startActivity(intent);
     }
 
+    /**
+     * Adds an image to a given location
+     * @param placeId - the google place id of a given location
+     * @param locationName - name of the location that is being associated with an image
+     */
     @Override
     public void addImageForLocation(String placeId, String locationName) {
         Intent intent = new Intent(TripViewActivity.this, ImageViewActivity.class);

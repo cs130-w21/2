@@ -10,6 +10,9 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Class for converting Objects to strings and then back to the objects. Necessary to be able to store them in databases
+ */
 public class ListToStringConverter {
     //found online at https://medium.com/@toddcookevt/android-room-storing-lists-of-objects-766cca57e3f9
     private static Gson _gson = new Gson();
