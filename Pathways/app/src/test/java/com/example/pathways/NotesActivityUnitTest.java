@@ -13,15 +13,11 @@ import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class NotesAdapterUnitTest {
+public class NotesActivityUnitTest {
     private NoteActivity activity;
 
     @Mock
