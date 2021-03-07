@@ -80,6 +80,7 @@ public class NotesActivityUnitTest {
         activity.addNotetoDb(testNote);
         NoteEntity note_ent = new NoteEntity();
         when(mockNoteDao.createNote(note_ent)).thenReturn(0l);
+        activity.addNotetoDb(testNote);
         //activity.addNote(note_ent);
        // doNothing().when(mockNoteDao).updateUser(user);
         //NoteEntity note_check = mockNoteDao.findById(id_check);
