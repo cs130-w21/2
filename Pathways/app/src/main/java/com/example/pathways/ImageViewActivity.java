@@ -16,6 +16,7 @@ import android.content.Context;
 
 
 import androidx.annotation.RequiresApi;
+import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -39,12 +40,16 @@ import java.util.concurrent.Executors;
 
 public class ImageViewActivity extends AppCompatActivity {
     private AppDatabase _db;
-    private TripDao _tripDao;
-    private ImageDao _imageDao;
+    @VisibleForTesting
+    TripDao _tripDao;
+    @VisibleForTesting
+    ImageDao _imageDao;
     private Executor _executor = Executors.newSingleThreadExecutor();
-    private ImageListAdapter _imagesListAdapter;
+    @VisibleForTesting
+    ImageListAdapter _imagesListAdapter;
     // Database entity
-    private TripEntity _tripEntity;
+    @VisibleForTesting
+    TripEntity _tripEntity;
     private String _placeId = "";
     private String _locationName = "";
     private ArrayList<ImageEntity> _imageEntities = new ArrayList<>();
@@ -119,6 +124,7 @@ public class ImageViewActivity extends AppCompatActivity {
     /**
      * fetches image ids from TripEntity fetched from database and then gets the corresponding images
      */
+    @VisibleForTesting
     private void addImagesFromImageIds() {
         if (_tripEntity.imageIds == null) {
             _tripEntity.imageIds = new ArrayList<>();
@@ -135,7 +141,22 @@ public class ImageViewActivity extends AppCompatActivity {
         }
         _imagesListAdapter.notifyDataSetChanged();
     }
+    @VisibleForTesting
+    protected void TestingOnAct(ImageEntity imageEntity){
+        _executor.execute(() -> {
+            Long imageId = _imageDao.insertImage(imageEntity);
+            imageEntity.imageId = imageId;
+            _imageEntities.add(imageEntity);
+            runOnUiThread(() -> _imagesListAdapter.notifyDataSetChanged());
 
+            if (_tripEntity.imageIds == null) {
+                _tripEntity.imageIds = new ArrayList<>();
+            }
+
+            _tripEntity.imageIds.add(imageId);
+            _tripDao.updateTrips(_tripEntity);
+        });
+    }
     /**
      * When selected image is done being fetched, add image to database
      *
@@ -168,19 +189,8 @@ public class ImageViewActivity extends AppCompatActivity {
             SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
             imageEntity.date = df.format(new Date());
 
-            _executor.execute(() -> {
-                Long imageId = _imageDao.insertImage(imageEntity);
-                imageEntity.imageId = imageId;
-                _imageEntities.add(imageEntity);
-                runOnUiThread(() -> _imagesListAdapter.notifyDataSetChanged());
+            TestingOnAct(imageEntity);
 
-                if (_tripEntity.imageIds == null) {
-                    _tripEntity.imageIds = new ArrayList<>();
-                }
-
-                _tripEntity.imageIds.add(imageId);
-                _tripDao.updateTrips(_tripEntity);
-            });
 
 
         }
