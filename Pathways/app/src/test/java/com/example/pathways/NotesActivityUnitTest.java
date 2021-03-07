@@ -108,14 +108,26 @@ public class NotesActivityUnitTest {
     }
 
 
-    //    @Test
-//    public void testDeleteNoteFromDb(){
-//        Note testNote = new Note("db_test title", "db_test text");
-//        activity.addNote(testNote);
-//        long id_check = activity.deleteNote(testNote);
-//        NoteEntity note_check = mockNoteDao.findById(id_check);
-//        Assert.assertEquals(testNote.title,note_check.title);
-//    }
+    @Test
+    public void testDeleteNoteFromDb() throws InterruptedException{
+        Note testNote = new Note("db_test title", "db_test text");
+       // activity.addNotetoDb(testNote);
+
+        TripEntity tripEntity = new TripEntity();
+        activity._tripEntity = tripEntity;
+        tripEntity.noteIds = new ArrayList<>();
+        tripEntity.noteIds.add(0l);
+        testNote.id = 0l;
+        when(mockNoteDao.findById(testNote.id)).thenReturn(null);
+        doNothing().when(mockTripDao).updateTrips(tripEntity);
+        activity.deleteNoteFromDb(testNote);
+        Thread.sleep(2000);
+        assertTrue("Note Id removed from trip entity", !tripEntity.noteIds.contains(0l));
+
+       // long id_check = activity.deleteNote(testNote);
+       // NoteEntity note_check = mockNoteDao.findById(id_check);
+        //Assert.assertEquals(testNote.title,note_check.title);
+    }
     @Test
     public void testDeleteNoteFromView(){
         Note testNote = new Note("test2 title", "test2 text");

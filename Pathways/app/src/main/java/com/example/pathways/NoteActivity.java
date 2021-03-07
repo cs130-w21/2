@@ -187,6 +187,16 @@ public class NoteActivity extends AppCompatActivity {
         });
     }
     @VisibleForTesting
+    public void deleteNoteFromDb(Note note)
+    {
+        _executor.execute(() -> {
+            _noteDao.deleteNote(_noteDao.findById(note.id));
+            _tripEntity.noteIds.remove(_tripEntity.noteIds.indexOf(note.id));
+            _tripDao.updateTrips(_tripEntity);
+        });
+
+    }
+    @VisibleForTesting
     public void addNote(Note note)
     {
         _emptyNotesTextView.setVisibility(View.GONE);
@@ -200,11 +210,7 @@ public class NoteActivity extends AppCompatActivity {
 
         //notesAdapter.remove(note);
         deleteNoteFromView(note);
-        _executor.execute(() -> {
-            _noteDao.deleteNote(_noteDao.findById(note.id));
-            _tripEntity.noteIds.remove(_tripEntity.noteIds.indexOf(note.id));
-            _tripDao.updateTrips(_tripEntity);
-        });
+        deleteNoteFromDb(note);
         return note.id;
     }
 
