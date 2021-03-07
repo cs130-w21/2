@@ -28,8 +28,13 @@ public class NoteActivity extends AppCompatActivity {
     private AppDatabase _db;
     @VisibleForTesting
     NoteDao _noteDao;
-    private TripDao _tripDao;
-    private TripEntity _tripEntity;
+
+    // Made visible for testing to mock it for addNotetoDb() test
+    @VisibleForTesting TripDao _tripDao;
+
+    // Made visible for testing for addNotetoDb() test
+    @VisibleForTesting TripEntity _tripEntity;
+
     private Executor _executor = Executors.newSingleThreadExecutor();
     private ArrayList<Note> notes = new ArrayList<>();
     private String _placeId = "";

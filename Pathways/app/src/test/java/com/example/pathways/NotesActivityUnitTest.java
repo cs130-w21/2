@@ -18,6 +18,8 @@ import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 import android.widget.TextView;
 import android.view.View;
+
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 
@@ -43,6 +45,10 @@ public class NotesActivityUnitTest {
 
     @Mock
     NoteDao mockNoteDao;
+
+    @Mock
+    TripDao mockTripDao;
+
     private TextView textView;
 
     @Before
@@ -50,6 +56,7 @@ public class NotesActivityUnitTest {
         activity = new NoteActivity();
         activity.notesAdapter = mockAdapter;
         activity._noteDao =  mockNoteDao;
+        activity._tripDao = mockTripDao;
     }
 
     @Test
@@ -70,20 +77,33 @@ public class NotesActivityUnitTest {
 
         assertTrue("Note note added to notesAdapter in addNote() call", addedNotes.contains(testNote));
     }
-    @Rule
-    public MockitoRule rule = MockitoJUnit.rule().strictness(Strictness.LENIENT);
+    // I think you do not need this Rule tag
+    //@Rule
+    //public MockitoRule rule = MockitoJUnit.rule().strictness(Strictness.LENIENT);
     @Test
-    public void testAddNote(){
+    public void testAddNote() throws InterruptedException {
 
         Note testNote = new Note("db_test title", "db_test text");
        // activity._emptyNotesTextView = new TextView(mockContext);
+
+        // you don't need to call addNotetoDb until everything is set up
+        //activity.addNotetoDb(testNote);
+
+        //NoteEntity note_ent = new NoteEntity();
+
+        // I used any() here to just accept any NoteEntity object
+        TripEntity tripEntity = new TripEntity();
+        activity._tripEntity = tripEntity;
+        when(mockNoteDao.createNote(any(NoteEntity.class))).thenReturn(0l);
+        doNothing().when(mockTripDao).updateTrips(tripEntity);
         activity.addNotetoDb(testNote);
-        NoteEntity note_ent = new NoteEntity();
-        when(mockNoteDao.createNote(note_ent)).thenReturn(0l);
-        activity.addNotetoDb(testNote);
+
+        Thread.sleep(2000);
+
         //activity.addNote(note_ent);
        // doNothing().when(mockNoteDao).updateUser(user);
         //NoteEntity note_check = mockNoteDao.findById(id_check);
+        assertTrue("Note ID added to trip entity", tripEntity.noteIds.contains(0l));
         Assert.assertEquals(testNote.id, 0l);
     }
 
