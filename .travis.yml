@@ -19,8 +19,8 @@ cache:
   - "$HOME/.android/build-cache"
 before_install:
 - cd Pathways
-- openssl aes-256-cbc -K $encrypted_c80f59e584b7_key -iv $encrypted_c80f59e584b7_iv
-  -in keystore.jks.enc -out keystore.jks -d
+#- openssl aes-256-cbc -K $encrypted_c80f59e584b7_key -iv $encrypted_c80f59e584b7_iv
+#  -in keystore.jks.enc -out keystore.jks -d
 - chmod +x gradlew
 script:
 - "./gradlew assembleRelease"
