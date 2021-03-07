@@ -145,6 +145,8 @@ public class NotesActivityUnitTest {
         activity.updateNoteDb(testNote, "changed title", "changed text");
         Thread.sleep(2000);
         assertEquals("Note updated", "changed title", testNote.title);
+        assertTrue("Note updated in trip entity", tripEntity.noteIds.contains(0l));
+
     }
     @Test
     public void testDeleteNoteFromView(){
