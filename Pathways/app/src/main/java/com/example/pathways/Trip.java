@@ -4,10 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 import android.graphics.Bitmap;
 
+import androidx.annotation.VisibleForTesting;
+
 public class Trip {
-    private ArrayList<Location> _locations = new ArrayList<>();
-    private String _name;
-    private List<Long> _noteIds;
+    @VisibleForTesting ArrayList<Location> _locations = new ArrayList<>();
+
+    @VisibleForTesting
+    String _name;
+
+    @VisibleForTesting
+    List<Long> _noteIds;
 
     public Trip() {}
 
