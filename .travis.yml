@@ -1,8 +1,5 @@
 language: android
 dist: trusty
-env:
-  global:
-    -
 android:
   components:
   - tools
@@ -30,10 +27,10 @@ script:
 deploy:
   provider: releases
   file_glob: true
-  file: /home/travis/build/cs130-w21/2/Pathways/app/build/outputs/apk/release/*
+  file: "/home/travis/build/cs130-w21/2/Pathways/app/build/outputs/apk/release/*"
   skip_cleanup: true
   on:
     repo: cs130-w21/2
     tags: true
   api_key:
-    secure: Rc74izuDNikeIjEsXgQc4yUfB7cvwbuwW/8TqoGIkim0Xx46O6/+1GKL0C3C4ewOdX3mYHvsAbYZn6rBd4zATZRm7YUNG/xZ30NL3AItGyJ9D9T/NB+y6qxzgHqMnfXYhQw/XZgM+FNTB6Wem2TqkzvfXaRTEUclOjWYGXkEZOGNj7AlK+DJ933yULIZzLsnOH2T27MbDdzQmTaUp1n8A7HSnb+3Pg+WlPrcB35BHJa2z7CQOE+FGAcmx72Hlqrnu3BNvynvwgpegrtmWEpvkvduH1FvNJglWi0n4o518mBa3Byl4U6lND8ZGfq4udbf1/tNNxTrTc1snyVHHDuOPRZn3GY0dGbe3n/VN/I+h8ackHlV5lRlJgS4nt9vgzkNyC40HAghc0XDEry4l5G8le2yWTQZbUecQ79tEdxTlDv7+Z+RsL+LygiCWF2gmWN2/AdyDR97oPk8iAq8aek7gMj2wryAPpxiwPAiDHhQ2GMKyKruDjCAwrNGiAVpqwhjQEHD0VfLYoO9rC52jH2JwkfB8NH+FMl3ZLIviICwmUX0ldlBZHPNhmilOlJ+WabObdx4Xs1zEM6Ee2eKZmNUoz31A1p8thofZxTDklX7OgQ0M6tyjIyZ7v3cQjPDxlIlaWn5cBejYf5fgG7eaiYtNi1AdGh3/9RF57v0chkgfNY=
+    secure: W59gsYRnkljdMv+dglwuB6s4IHh9IdEsXIlJvjbMUgX3IidfFMEU2RPdkYUz1VmtFPJgR/w0ha2g26TzOnkjt4y/hYm4TfiCuU2cBVbIA+r9UBjL8jQOnnFjdLj6oRnz2+suuY/die61VbacwOoxg4GHk2vcJgU1YBXTt0hKOy7Ht/WxqUzuIKp2W9QLqD+PsgvUYU2wo7tbSdcwF0W1SvJptfLz0ug+2gvf0JtaTVNfazvub8+tDqS+YvICPBlMxHyrLEYc4AXVLm3CZg68aLQg5Khrvy+PFVjFVqKHH9tVSwjYDVOW/HEb2ycGd1Ce7oTgQRm04N575jzlTyrZjW3+rDyeCvE9BmtDRkhuY7+Iz2yEpz35O1uzoF/QXISqqNQUDA+ZiYC74sKl3FRxOIOOkift0SSb5WoH9b8qLuDfwnbN5WMppOdllEG3LaqVvNZOlC224LQeJA0gaIuEVw4UUAYM4m51rEAnHmGRRRIdrdP3FOtaPCmLNN34YPqscK/koLODZxoPGqRxpFhgtscapvwgnovT73qF2LmiQZMYt6KaZhwnqHITuOvimFKFrQ5bkJvECuWfYrva4wechAx/uorm65RSMIEJU5TfS+jKaVWNQSdp2GtUXjxMKV5paNhZifJSjWYzhc6wVlfzoOlcr9krw52Hyct8KHgIygI=
