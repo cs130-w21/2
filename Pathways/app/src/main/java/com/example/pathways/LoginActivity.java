@@ -42,6 +42,9 @@ public class LoginActivity extends AppCompatActivity {
     private ProgressBar _progressBar;
     private FirebaseAuth auth;
 
+    /**
+     * If user has already signed in, navigate directly to initial page without the user needing to log back in
+     */
     @Override
     public void onStart() {
         super.onStart();
@@ -55,6 +58,10 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Initializes UI components of log in page
+     * @param savedInstanceState
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,6 +93,11 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * When user enters email and password, create firebase user
+     * @param email - User's email
+     * @param password - User's password (>6 characters)
+     */
     public void register(String email, String password) {
         if (!validate()) {
             return;
@@ -115,6 +127,11 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Check if user exists with given email and password and then log in to app if so
+     * @param email - User's email
+     * @param password - User's password (>6 characters)
+     */
     public void login(String email, String password) {
         if (!validate()) {
             return;
@@ -143,6 +160,10 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Make sure email and password fields are populated
+     * @return True if email and password fields are both populated, False otherwise
+     */
     public boolean validate() {
         String email = _emailText.getText().toString();
         String password = _passwordText.getText().toString();

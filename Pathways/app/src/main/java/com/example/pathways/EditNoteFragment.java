@@ -28,6 +28,9 @@ public class EditNoteFragment extends DialogFragment {
         note = n;
     }
 
+    /**
+     * initializes dialog view
+     */
     @Override
     public void onStart() {
         super.onStart();
@@ -39,6 +42,14 @@ public class EditNoteFragment extends DialogFragment {
         }
     }
 
+    /**
+     * Inflates dialog view
+     *
+     * @param inflater - Tool to show dialog UI
+     * @param container - Container needed to create dialog view
+     * @param savedInstanceState - Android specific object
+     * @return - inflated view
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -47,7 +58,12 @@ public class EditNoteFragment extends DialogFragment {
         return inflater.inflate(R.layout.edit_note_fragment, container, false);
     }
 
-    /** The system calls this only when creating the layout in a dialog. */
+    /**
+     * The system calls this only when creating the layout in a dialog.
+     *
+     * @param savedInstanceState - Android specific object
+     * @return dialog - Dialog UI object
+     */
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // The only reason you might override this method when using onCreateView() is
@@ -59,6 +75,12 @@ public class EditNoteFragment extends DialogFragment {
         return dialog;
     }
 
+    /**
+     * Handles all the main functionality of the edit note fragment
+     *
+     * @param view - UI object of fragment
+     * @param savedInstanceState - Android specific object
+     */
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         cancelButton = getView().findViewById(R.id.cancel_edit_button);

@@ -52,6 +52,12 @@ public class ImageListAdapter extends RecyclerView.Adapter<ImageListAdapter.View
         return new ImageListAdapter.ViewHolder(view);
     }
 
+    /**
+     * Handles primary functionality of Image List
+     *
+     * @param holder
+     * @param position
+     */
     @Override
     public void onBindViewHolder(@NonNull ImageListAdapter.ViewHolder holder, int position) {
         ImageEntity imageEntity = _imageEntities.get(position);

@@ -9,6 +9,7 @@ import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 
+import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -36,15 +37,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     FloatingActionButton _tripFab;
     ArrayAdapter<String> _arrayAdapter;
     private AppDatabase _db;
-    private TripDao _tripDao;
-    private UserDao _userDao;
-    private UserEntity _user;
+    @VisibleForTesting TripDao _tripDao;
+    @VisibleForTesting UserDao _userDao;
+    @VisibleForTesting UserEntity _user;
     private String _userEmail;
     private Executor _executor = Executors.newSingleThreadExecutor();
-    private List<TripEntity> _tripList;
-    private List<String> _tripNameList;
+    @VisibleForTesting List<TripEntity> _tripList;
+    @VisibleForTesting List<String> _tripNameList;
     private FirebaseAuth _auth;
 
+    /**
+     * Initializes all the needed components of the first screen seen upon signing into the app.
+     * This is called automatically by Android when the page is first loaded.
+     *
+     * @param savedInstanceState - Provided by Android
+     *
+     * @return void
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,8 +123,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-
-    private void populateTrips(UserEntity userEntity) {
+  /**
+   * Populates member variables _tripNameList and _tripList with the names of trips and the TripEntity
+   * representations of trips respectively.
+   *
+   * @param userEntity - an instance of a UserEntity queried from the Room database
+   *
+   * @return void
+   */
+  @VisibleForTesting
+    void populateTrips(UserEntity userEntity) {
         if (userEntity == null || userEntity.tripIds == null) {
             Log.e("populateTrips: ", "User null");
             return;
@@ -136,6 +153,39 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    @VisibleForTesting
+    void createTrip(TripEntity trip) {
+        //Log.v("Inserting trip: ", trip.tripName);
+        Long tripId = _tripDao.insert(trip);
+
+        Intent intent = new Intent(MainActivity.this, TripViewActivity.class);
+        intent.putExtra("TRIP ID", tripId);
+        intent.putExtra("EMAIL", _userEmail);
+        startActivity(intent);
+
+        trip.tripid = tripId;
+        _tripList.add(trip);
+        _tripNameList.add(trip.tripName);
+
+        runOnUiThread(() -> _arrayAdapter.notifyDataSetChanged());
+
+        if (_user.tripIds == null) {
+            _user.tripIds = new ArrayList<Long>();
+        }
+        _user.tripIds.add(tripId);
+        _userDao.updateUser(_user);
+
+    }
+
+    /**
+     * Creates the pop up dialog box that allows the user to name their trip. Once given a name, it will create a new
+     * trip in the Room database, then insert the corresponding trip id to the user's list of tip ids. Will navigate
+     * to the TripViewActivity and pass the trip id and user email.
+     *
+     * @param c - Android activity context
+     *
+     * @return void
+     */
     private void createTripDialog(Context c) {
         //Found online, credit to Alvin Alexander
         final EditText taskEditText = new EditText(c);
@@ -152,26 +202,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         _executor.execute(new Runnable() {
                             @Override
                             public void run() {
-                                Log.v("Inserting trip: ", trip.tripName);
-                                Long tripId = _tripDao.insert(trip);
-
-                                Intent intent = new Intent(MainActivity.this, TripViewActivity.class);
-                                intent.putExtra("TRIP ID", tripId);
-                                intent.putExtra("EMAIL", _userEmail);
-                                startActivity(intent);
-
-                                trip.tripid = tripId;
-                                _tripList.add(trip);
-                                _tripNameList.add(trip.tripName);
-
-                                runOnUiThread(() -> _arrayAdapter.notifyDataSetChanged());
-
-                                if (_user.tripIds == null) {
-                                    _user.tripIds = new ArrayList<Long>();
-                                }
-                                _user.tripIds.add(tripId);
-                                _userDao.updateUser(_user);
-
+                                createTrip(trip);
                             }
                         });
 
@@ -182,7 +213,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dialog.show();
     }
 
-
+    /**
+     * Populates the search functionality with trip names. Called by Android to handle search bar functionality
+     *
+     * @param menu
+     *
+     * @return - always returns true
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -209,6 +246,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return true;
     }
 
+    /**
+     * Signs the user out when User clicks the logout button
+     *
+     * @param item - the button that was clicked
+     *
+     * @return the return value of the super class's method that this is overriding
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will

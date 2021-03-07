@@ -15,6 +15,10 @@ import java.io.FileNotFoundException;
 
 public class PhotoViewActivity extends AppCompatActivity{
 
+    /**
+     * Initializes UI components to view photos
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
