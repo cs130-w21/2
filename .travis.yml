@@ -1,52 +1,39 @@
 language: android
 dist: trusty
-
+env:
+  global:
+    -
 android:
   components:
-    # Uncomment the lines below if you want to
-    # use the latest revision of Android SDK Tools
-    - tools
-    - platform-tools
-
-    # The BuildTools version used by your project
-    - build-tools-29.0.2
-
-    # The SDK version used to compile your project
-    - android-29
-
-    # Additional components
-    - extra-google-google_play_services
-    - extra-google-m2repository
-    - extra-android-m2repository
-
-    # Specify at least one system image,
-    # if you need to run emulator(s) during your tests
-    #- sys-img-x86-android-29
-    - sys-img-armeabi-v7a-android-29
-
+  - tools
+  - platform-tools
+  - build-tools-29.0.2
+  - android-29
+  - extra-google-google_play_services
+  - extra-google-m2repository
+  - extra-android-m2repository
 before_cache:
-  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
-  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
 cache:
   directories:
-    - $HOME/.gradle/caches/
-    - $HOME/.gradle/wrapper/
-    - $HOME/.android/build-cache
-
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
+  - "$HOME/.android/build-cache"
 before_install:
+- openssl aes-256-cbc -K $encrypted_c80f59e584b7_key -iv $encrypted_c80f59e584b7_iv
+  -in keystore.jks.enc -out keystore.jks -d
 - cd Pathways
 - chmod +x gradlew
-
 script:
-  - ./gradlew build
-  - ./gradlew test
-
-# Emulator Management: Create, Start and Wait
-#before_script:
-#  - echo no | android create avd --force -n test -t android-29 --abi armeabi-v7a -c 100M
-#  - emulator -avd test -no-audio -no-window &
-#  - android-wait-for-emulator
-#  - adb shell input keyevent 82 &
-
-#script:
-#   - ./gradlew build checkstyle connectedCheck -PdisablePreDex
+- "./gradlew assembleRelease"
+deploy:
+  provider: releases
+  file_glob: true
+  file: /home/travis/build/cs130-w21/2/Pathways/app/build/outputs/apk/release/*
+  skip_cleanup: true
+  on:
+    repo: cs130-w21/2
+    tags: true
+  api_key:
+    secure: Rc74izuDNikeIjEsXgQc4yUfB7cvwbuwW/8TqoGIkim0Xx46O6/+1GKL0C3C4ewOdX3mYHvsAbYZn6rBd4zATZRm7YUNG/xZ30NL3AItGyJ9D9T/NB+y6qxzgHqMnfXYhQw/XZgM+FNTB6Wem2TqkzvfXaRTEUclOjWYGXkEZOGNj7AlK+DJ933yULIZzLsnOH2T27MbDdzQmTaUp1n8A7HSnb+3Pg+WlPrcB35BHJa2z7CQOE+FGAcmx72Hlqrnu3BNvynvwgpegrtmWEpvkvduH1FvNJglWi0n4o518mBa3Byl4U6lND8ZGfq4udbf1/tNNxTrTc1snyVHHDuOPRZn3GY0dGbe3n/VN/I+h8ackHlV5lRlJgS4nt9vgzkNyC40HAghc0XDEry4l5G8le2yWTQZbUecQ79tEdxTlDv7+Z+RsL+LygiCWF2gmWN2/AdyDR97oPk8iAq8aek7gMj2wryAPpxiwPAiDHhQ2GMKyKruDjCAwrNGiAVpqwhjQEHD0VfLYoO9rC52jH2JwkfB8NH+FMl3ZLIviICwmUX0ldlBZHPNhmilOlJ+WabObdx4Xs1zEM6Ee2eKZmNUoz31A1p8thofZxTDklX7OgQ0M6tyjIyZ7v3cQjPDxlIlaWn5cBejYf5fgG7eaiYtNi1AdGh3/9RF57v0chkgfNY=
