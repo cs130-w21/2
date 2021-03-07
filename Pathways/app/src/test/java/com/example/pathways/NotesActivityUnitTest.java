@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
@@ -127,6 +128,23 @@ public class NotesActivityUnitTest {
        // long id_check = activity.deleteNote(testNote);
        // NoteEntity note_check = mockNoteDao.findById(id_check);
         //Assert.assertEquals(testNote.title,note_check.title);
+    }
+
+    @Test
+    public void testUpdateNoteDb() throws InterruptedException{
+        Note testNote = new Note("db_test title", "db_test text");
+        TripEntity tripEntity = new TripEntity();
+        activity._tripEntity = tripEntity;
+        tripEntity.noteIds = new ArrayList<>();
+        tripEntity.noteIds.add(0l);
+        testNote.id = 0l;
+       // when(mockNoteDao.findById(testNote.id)).thenReturn(null);
+       // doNothing().when(mockTripDao).updateTrips(tripEntity);
+        //when(mockNoteDao.createNote(any(NoteEntity.class))).thenReturn(0l);
+        //doNothing().when(mockTripDao).updateTrips(tripEntity);
+        activity.updateNoteDb(testNote, "changed title", "changed text");
+        Thread.sleep(2000);
+        assertEquals("Note updated", "changed title", testNote.title);
     }
     @Test
     public void testDeleteNoteFromView(){

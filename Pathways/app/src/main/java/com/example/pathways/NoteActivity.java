@@ -214,11 +214,16 @@ public class NoteActivity extends AppCompatActivity {
         return note.id;
     }
 
+    @VisibleForTesting
+    public void updateNoteDb(Note note, String title, String text){
+        note.title = title;
+        note.text = text;
+        notesAdapter.notifyDataSetChanged();
+    }
+
     public void updateNote(Note note, String title, String text) {
-//        note.title = title;
-//        note.text = text;
-//        notesAdapter.notifyDataSetChanged();
         updateNoteInView(note,title,text);
+        updateNoteDb(note,title,text);
         _executor.execute(() -> {
             NoteEntity noteEntity = _noteDao.findById(note.id);
             noteEntity.text = note.text;
