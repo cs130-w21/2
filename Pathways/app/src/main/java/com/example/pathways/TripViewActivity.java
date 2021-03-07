@@ -38,6 +38,7 @@ import com.google.maps.model.DirectionsRoute;
 import com.google.maps.model.LatLng;
 
 
+import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.core.content.res.ResourcesCompat;
@@ -60,9 +61,9 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
     private BottomSheetBehavior _bottomSheetBehavior;
     private LocationsListAdapter _locationsListAdapter;
     private AppDatabase _db;
-    private TripDao _tripDao;
-    private UserDao _userDao;
-    private String _userEmail;
+    @VisibleForTesting TripDao _tripDao;
+    @VisibleForTesting UserDao _userDao;
+    @VisibleForTesting String _userEmail;
     private AutocompleteSupportFragment _autocompleteFragment;
     private GeoApiContext _geoApiContext;
     private Polyline _routePolyline;
@@ -81,9 +82,9 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         MIDDLE,
     }
 
-    private Trip _trip;
+    @VisibleForTesting Trip _trip;
     // Database entity
-    private TripEntity _tripEntity;
+    @VisibleForTesting TripEntity _tripEntity;
 
     /**
      * Initializes  all the necessary components of the central page where a user can interact with their trips.
@@ -192,6 +193,19 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
         });
     }
 
+    @VisibleForTesting
+    void deleteTrip() {
+        _executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                UserEntity userEntity = _userDao.findByEmail(_userEmail);
+                userEntity.tripIds.remove(_tripEntity.tripid);
+                _tripDao.delete(_tripEntity);
+                _userDao.updateUser(userEntity);
+            }
+        });
+    }
+
     /**
      * Creates the pop up dialog that ensures a user intends to delete one of their trips
      *
@@ -203,15 +217,7 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        _executor.execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                UserEntity userEntity = _userDao.findByEmail(_userEmail);
-                                userEntity.tripIds.remove(_tripEntity.tripid);
-                                _tripDao.delete(_tripEntity);
-                                _userDao.updateUser(userEntity);
-                            }
-                        });
+                        deleteTrip();
                         Intent intent = new Intent(TripViewActivity.this, MainActivity.class);
                         intent.putExtra("EMAIL", _userEmail);
                         startActivity(intent);
@@ -423,7 +429,7 @@ public class TripViewActivity extends FragmentActivity implements OnMapReadyCall
     /**
      * Creates a new Trip from the current TripEntity. Then updates the map based on information from Trip
      */
-    private void generateTripFromTripEntity() {
+    @VisibleForTesting void generateTripFromTripEntity() {
         _trip = new Trip(_tripEntity.tripName);
 
         if (_tripEntity.placeIds == null) {
