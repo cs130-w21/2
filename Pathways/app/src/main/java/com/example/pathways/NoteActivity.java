@@ -26,15 +26,24 @@ public class NoteActivity extends AppCompatActivity {
     private Long tripId;
 
     private AppDatabase _db;
-    private NoteDao _noteDao;
-    private TripDao _tripDao;
-    private TripEntity _tripEntity;
+    @VisibleForTesting
+    NoteDao _noteDao;
+
+    // Made visible for testing to mock it for addNotetoDb() test
+    @VisibleForTesting TripDao _tripDao;
+
+    // Made visible for testing for addNotetoDb() test
+    @VisibleForTesting TripEntity _tripEntity;
+
     private Executor _executor = Executors.newSingleThreadExecutor();
     private ArrayList<Note> notes = new ArrayList<>();
     private String _placeId = "";
     private String _locationName = "";
-    private TextView _locationTextView;
-    private TextView _emptyNotesTextView;
+
+    @VisibleForTesting
+    TextView _locationTextView;
+    @VisibleForTesting
+    TextView _emptyNotesTextView;
 
     /**
      * Initializes necessary UI components of Note page
@@ -61,8 +70,8 @@ public class NoteActivity extends AppCompatActivity {
             }
         });
 
-        _emptyNotesTextView = findViewById(R.id.empty_notes_text);
 
+        _emptyNotesTextView = findViewById(R.id.empty_notes_text);
 
         tripId = getIntent().getLongExtra("TRIP ID", 0);
 
@@ -156,17 +165,23 @@ public class NoteActivity extends AppCompatActivity {
         notesAdapter.add(note);
     }
 
-    /**
-     * Add given note to database
-     * @param note - Note to be added
-     */
-    public void addNote(Note note)
+    @VisibleForTesting
+    void deleteNoteFromView(Note note)
+
     {
-        _emptyNotesTextView.setVisibility(View.GONE);
+        notesAdapter.remove(note);
+    }
 
-        addNoteToView(note);
-
-        //add note to database
+    @VisibleForTesting
+    void updateNoteInView(Note note, String title, String text)
+    {
+        note.title = title;
+        note.text = text;
+        notesAdapter.notifyDataSetChanged();
+    }
+    @VisibleForTesting
+    public void addNotetoDb(Note note)
+    {
         _executor.execute(() -> {
             NoteEntity noteEntity = new NoteEntity();
             noteEntity.date = note.created;
@@ -186,33 +201,45 @@ public class NoteActivity extends AppCompatActivity {
             Log.v("adding", note.title);
         });
     }
-
-    /**
-     * Removes note from database
-     *
-     * @param note - Note to be deleted
-     */
-    public void deleteNote(Note note) {
-
-        notesAdapter.remove(note);
+    @VisibleForTesting
+    public void deleteNoteFromDb(Note note)
+    {
         _executor.execute(() -> {
             _noteDao.deleteNote(_noteDao.findById(note.id));
             _tripEntity.noteIds.remove(_tripEntity.noteIds.indexOf(note.id));
             _tripDao.updateTrips(_tripEntity);
         });
+
+    }
+    @VisibleForTesting
+    public void addNote(Note note)
+    {
+        _emptyNotesTextView.setVisibility(View.GONE);
+        addNoteToView(note);
+
+        //add note to database
+        addNotetoDb(note);
     }
 
-    /**
-     * Updates Note in database
-     *
-     * @param note - Note to be updated
-     * @param title - New title for note
-     * @param text - New text for note
-     */
-    public void updateNote(Note note, String title, String text) {
+    public long deleteNote(Note note) {
+
+        //notesAdapter.remove(note);
+        deleteNoteFromView(note);
+        deleteNoteFromDb(note);
+        return note.id;
+    }
+
+    @VisibleForTesting
+    public void updateNoteDb(Note note, String title, String text){
+
         note.title = title;
         note.text = text;
         notesAdapter.notifyDataSetChanged();
+    }
+
+    public void updateNote(Note note, String title, String text) {
+        updateNoteInView(note,title,text);
+        updateNoteDb(note,title,text);
         _executor.execute(() -> {
             NoteEntity noteEntity = _noteDao.findById(note.id);
             noteEntity.text = note.text;
