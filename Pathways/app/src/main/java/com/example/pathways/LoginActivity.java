@@ -74,6 +74,9 @@ public class LoginActivity extends AppCompatActivity {
         _progressBar = new ProgressBar(this);
         auth = FirebaseAuth.getInstance();
 
+        getSupportActionBar().hide();
+
+
         _submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -117,8 +120,8 @@ public class LoginActivity extends AppCompatActivity {
                             //updateUI(user);
                         } else {
                             // If sign in fails, display a message to the user.
-                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                            Toast.makeText(LoginActivity.this, "Authentication failed.",
+                            Log.w(TAG, "createUserWithEmail:failure" + task.getException().getMessage());
+                            Toast.makeText(LoginActivity.this, "Registration failed: " + task.getException().getMessage(),
                                     Toast.LENGTH_LONG).show();
                             //updateUI(null);
                         }

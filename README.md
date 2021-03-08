@@ -24,3 +24,4 @@ Because the application build must be signed and keystore usernames and password
 ### Running Tests
 
 To run tests for Pathways, execute `./gradlew test` in the `Pathways` directory.
+
