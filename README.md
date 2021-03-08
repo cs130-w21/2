@@ -20,3 +20,7 @@ The recommended way to build and run the app outside of Travis CI is to use Andr
 To trigger a debug build without using Travis CI or Android Studio, run `./gradlew assembleDebug` in the Pathways directory. The APK will appear in the directory `/2/Pathways/app/build/outputs/apk/debug/`. Do not rename the APK or it will fail. 
 
 Because the application build must be signed and keystore usernames and passwords are encrypted in Travis, only a debug build can be created without re-signing the application. A release build will require you to [sign the app](https://developer.android.com/studio/publish/app-signing). Then, similarly you can use `./gradlew assembleRelease` or follow other instructions to build in Android Studio. The cleanest way to build a release is to allow Travis CI to run the script in Github or by restarting a previous build on [travis-ci.com](https://travis-ci.com/). Signing the app without Travis will require updates to gradle files in the application so the appropriate keystore credentials can be obtained.
+
+### Running Tests
+
+To run tests for Pathways, execute `./gradlew test` in the `Pathways` directory.
